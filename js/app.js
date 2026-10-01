@@ -175,9 +175,3 @@ if (btnInstalar) {
         instaladorPWA = null;
         btnInstalar.classList.add('oculto');
     });
-}
-
-// Oculta o botão se a aplicação já estiver instalada/aberta
-window.addEventListener('appinstalled', () => {
-    if (btnInstalar) btnInstalar.classList.add('oculto');
-});
