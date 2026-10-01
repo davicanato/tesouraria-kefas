@@ -19,7 +19,7 @@ const PAGINAS = [
     { arquivo: 'dashboard.html',     nome: 'Dashboard',     soAdmin: false, pronta: true  },
     { arquivo: 'entradas.html',      nome: 'Entradas',      soAdmin: true,  pronta: true },
     { arquivo: 'saidas.html',        nome: 'Saídas',        soAdmin: true,  pronta: true },
-    { arquivo: 'historico.html',     nome: 'Histórico',     soAdmin: false, pronta: false },
+    { arquivo: 'historico.html',     nome: 'Histórico',     soAdmin: false, pronta: true },
     { arquivo: 'relatorios.html',    nome: 'Relatórios',    soAdmin: false, pronta: false },
     { arquivo: 'configuracoes.html', nome: 'Configurações', soAdmin: true,  pronta: false }
 ];
