@@ -21,6 +21,10 @@
             justify-content: center;
         }
 
+        .oculto {
+            display: none !important;
+        }
+
         .app {
             width: 100%;
             max-width: 430px;
@@ -87,6 +91,52 @@
             opacity: 0.9;
         }
 
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        button.secundario {
+            background: #eeeeee;
+            color: #444;
+            margin-top: 30px;
+        }
+
+        .mensagem {
+            margin-top: 14px;
+            font-size: 14px;
+            color: #c0392b;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .boas-vindas {
+            text-align: center;
+        }
+
+        .boas-vindas .ola {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .selo {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 20px;
+            background: #f6efdc;
+            color: #8a6c1f;
+        }
+
+        .aviso {
+            margin-top: 18px;
+            font-size: 14px;
+            color: #777;
+            line-height: 1.5;
+        }
+
         .footer {
             text-align: center;
             margin-top: 50px;
@@ -102,45 +152,145 @@
 
         <section class="logo">
             <h1>Tesouraria | M.A.K.E.L</h1>
-          <!--  <p>Controle Financeiro Ministerial</p>-->
-       <!-- <p>Ministério Apostólico Kefas</p> --> 
+            <!-- <p>Controle Financeiro Ministerial</p> -->
+            <!-- <p>Ministério Apostólico Kefas</p> -->
         </section>
 
-        <section class="login-box">
+        <!-- TELA DE LOGIN -->
+        <section id="tela-login" class="login-box oculto">
+            <form id="form-login">
+                <label for="usuario">Usuário</label>
+                <input
+                    type="text"
+                    id="usuario"
+                    placeholder="Digite seu usuário"
+                    autocomplete="username"
+                    autocapitalize="none"
+                    required
+                >
 
-            <label for="usuario">Usuário</label>
-            <input
-                type="text"
-                id="usuario"
-                placeholder="Digite seu usuário"
-            >
+                <label for="senha">Senha</label>
+                <input
+                    type="password"
+                    id="senha"
+                    placeholder="Digite sua senha"
+                    autocomplete="current-password"
+                    required
+                >
 
-            <label for="senha">Senha</label>
-            <input
-                type="password"
-                id="senha"
-                placeholder="Digite sua senha"
-            >
+                <button id="botao-entrar" type="submit">
+                    ENTRAR
+                </button>
 
-            <button onclick="entrar()">
-                ENTRAR
+                <div id="mensagem" class="mensagem"></div>
+            </form>
+        </section>
+
+        <!-- TELA APÓS O LOGIN (provisória) -->
+        <section id="tela-app" class="boas-vindas oculto">
+            <div id="ola" class="ola"></div>
+            <div id="selo" class="selo"></div>
+            <p class="aviso">Login funcionando. O dashboard será criado na próxima etapa.</p>
+            <button id="botao-sair" class="secundario" type="button">
+                SAIR
             </button>
-
         </section>
 
-<div class="footer">
-    Aplicativo Oficial | Feito Por @davicanato1 <br>
-    Ministério Apostólico Kefas Lavradas ©<span id="ano-atual">2026</span> <br>
-    <center> CNPJ | 56.797.417/0001-81 </center>
-</div>
-
+        <div class="footer">
+            Aplicativo Oficial | Feito Por @davicanato1 <br>
+            Ministério Apostólico Kefas Lavradas ©<span id="ano-atual">2026</span> <br>
+            <center> CNPJ | 56.797.417/0001-81 </center>
+        </div>
 
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        function entrar() {
-            alert("Login será conectado ao Supabase na próxima etapa.");
+        // ---- Conexão com o Supabase (a chave publishable é pública) ----
+        const SUPABASE_URL = 'https://hzlmiojvtlieyybpqgsh.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_goagYxbDY883ytUGkvLoSA_eAiVX-6P';
+
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const telaLogin = document.getElementById('tela-login');
+        const telaApp = document.getElementById('tela-app');
+        const formLogin = document.getElementById('form-login');
+        const botaoEntrar = document.getElementById('botao-entrar');
+        const mensagem = document.getElementById('mensagem');
+
+        document.getElementById('ano-atual').textContent = new Date().getFullYear();
+
+        function mostrarLogin() {
+            telaApp.classList.add('oculto');
+            telaLogin.classList.remove('oculto');
         }
+
+        async function mostrarApp(usuario) {
+            telaLogin.classList.add('oculto');
+            telaApp.classList.remove('oculto');
+
+            const { data, error } = await db
+                .from('profiles')
+                .select('nome, role')
+                .eq('id', usuario.id)
+                .single();
+
+            if (error || !data) {
+                document.getElementById('ola').textContent = 'Perfil não encontrado';
+                document.getElementById('selo').textContent = 'Sem permissão';
+                return;
+            }
+
+            document.getElementById('ola').textContent = 'Olá, ' + data.nome;
+            document.getElementById('selo').textContent =
+                data.role === 'admin' ? 'Administrador' : 'Visualização';
+        }
+
+        formLogin.addEventListener('submit', async (evento) => {
+            evento.preventDefault();
+            mensagem.textContent = '';
+            botaoEntrar.disabled = true;
+            botaoEntrar.textContent = 'ENTRANDO...';
+
+            let email = document.getElementById('usuario').value.trim();
+            const senha = document.getElementById('senha').value;
+
+            // Se digitarem só "pastores", completa para pastores@kefas.com
+            if (!email.includes('@')) {
+                email = email.toLowerCase() + '@kefas.com';
+            }
+
+            const { data, error } = await db.auth.signInWithPassword({
+                email: email,
+                password: senha
+            });
+
+            botaoEntrar.disabled = false;
+            botaoEntrar.textContent = 'ENTRAR';
+
+            if (error) {
+                mensagem.textContent = 'Usuário ou senha incorretos.';
+                return;
+            }
+
+            document.getElementById('senha').value = '';
+            mostrarApp(data.user);
+        });
+
+        document.getElementById('botao-sair').addEventListener('click', async () => {
+            await db.auth.signOut();
+            mostrarLogin();
+        });
+
+        // Ao abrir o site, verifica se já existe um login ativo
+        (async () => {
+            const { data } = await db.auth.getSession();
+            if (data.session) {
+                mostrarApp(data.session.user);
+            } else {
+                mostrarLogin();
+            }
+        })();
     </script>
 
 </body>
