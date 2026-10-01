@@ -21,7 +21,8 @@ const PAGINAS = [
     { arquivo: 'saidas.html',        nome: 'Saídas',        soAdmin: true,  pronta: true },
     { arquivo: 'historico.html',     nome: 'Histórico',     soAdmin: false, pronta: true },
     { arquivo: 'relatorios.html',    nome: 'Relatórios',    soAdmin: false, pronta: true },
-    { arquivo: 'configuracoes.html', nome: 'Configurações', soAdmin: true,  pronta: true }
+    { arquivo: 'configuracoes.html', nome: 'Configurações', soAdmin: true,  pronta: true },
+    { arquivo: 'membros.html',       nome: 'Membros',       soAdmin: false, pronta: true  },
 ];
 
 // ---------- Funções de dinheiro e data ----------
