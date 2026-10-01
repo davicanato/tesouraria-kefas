@@ -1,281 +1,219 @@
 /* =====================================================
-   TESOURARIA KEFAS - ESTILO PREMIUM E COMPARTILHADO
-   Design Executivo com Dourado Gradiente & Alta Precisão
+   TESOURARIA KEFAS - DESIGN ULTRA-PREMIUM (VERSÃO 2.0)
+   - Correção de sombras cortadas / bordas serrilhadas
+   - Integração para logo com iluminação sutil
+   - Gradiente metálico dourado realista
    ===================================================== */
 
-/* ---------- Variáveis Globais de Cores e Estilos ---------- */
 :root {
-    /* Degradês Dourados */
-    --dourado-gradiente: linear-gradient(135deg, #e5c07b 0%, #c49a45 45%, #9e7422 100%);
-    --dourado-gradiente-hover: linear-gradient(135deg, #eed291 0%, #d4aa52 45%, #b2852d 100%);
-    --dourado-gradiente-suave: linear-gradient(135deg, #fffcf5 0%, #f7f1e1 100%);
+    /* Degradê Dourado Metálico Realista (Liso e sem serrilhado) */
+    --dourado-gradiente: linear-gradient(135deg, #d4af37 0%, #c59b27 40%, #a37c1e 100%);
+    --dourado-gradiente-hover: linear-gradient(135deg, #e5be48 0%, #d6ac38 40%, #b48d2f 100%);
+    --dourado-gradiente-soft: linear-gradient(135deg, #fefcf7 0%, #f6f0df 100%);
     
-    /* Cores de Apoio Douradas */
-    --dourado-principal: #c49a45;
-    --dourado-escuro: #8a6518;
-    --dourado-claro-fundo: #fbf7ee;
-    --dourado-borda: rgba(196, 154, 69, 0.3);
+    /* Cores Douradas Finais */
+    --dourado-principal: #c59b27;
+    --dourado-escuro: #7a5c12;
+    --dourado-fundo: #fbf8f0;
+    --dourado-borda: rgba(197, 155, 39, 0.25);
     
-    /* Neutros Executivos */
-    --bg-pagina: #f0f2f5;
+    /* Neutros de Alta Definição */
+    --bg-pagina: #f1f3f6;
     --card-fundo: #ffffff;
-    --texto-principal: #1a1d20;
-    --texto-secundario: #6c757d;
-    --borda-suave: #eaedf1;
+    --texto-titulo: #0f172a;
+    --texto-corpo: #475569;
+    --borda-fina: rgba(226, 232, 240, 0.8);
     
-    /* Status Financeiros */
-    --verde-sucesso: #10b981;
-    --verde-fundo: #ecfdf5;
-    --vermelho-erro: #ef4444;
-    --vermelho-fundo: #fef2f2;
-
-    /* Sombras Elevadas */
-    --sombra-card: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px -2px rgba(0, 0, 0, 0.02);
-    --sombra-dourada: 0 8px 20px -4px rgba(196, 154, 69, 0.35);
-    --sombra-foco: 0 0 0 4px rgba(196, 154, 69, 0.18);
+    /* Sombras Macias de Alta Precisão (Sem corte de caixa) */
+    --sombra-pill-dourado: 0 4px 14px rgba(197, 155, 39, 0.35);
+    --sombra-card-suave: 0 10px 25px -5px rgba(15, 23, 42, 0.05);
 }
 
-/* ---------- Resets & Fontes Globais ---------- */
+/* ---------- Reset & Renderização Anti-Serrilhado ---------- */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: var(--bg-pagina);
-    color: var(--texto-principal);
+    color: var(--texto-corpo);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    -webkit-font-smoothing: antialiased;
 }
 
-.oculto { 
-    display: none !important; 
-}
+.oculto { display: none !important; }
 
-/* ---------- Container Principal (App) ---------- */
+/* ---------- Container Principal ---------- */
 .app {
     width: 100%;
     max-width: 480px;
     min-height: 100vh;
     background: var(--card-fundo);
-    padding: 36px 28px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    padding: 36px 26px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.09);
     display: flex;
     flex-direction: column;
-    position: relative;
+    /* IMPORTANTE: Removido overflow:hidden do app para não cortar sombras de botões */
 }
 
 @media (min-width: 520px) {
     .app {
         min-height: auto;
-        margin: 40px auto;
+        margin: 30px auto;
         border-radius: 24px;
-        border: 1px solid rgba(255, 255, 255, 0.8);
+        border: 1px solid var(--borda-fina);
     }
 }
 
-/* ---------- Logo / Identidade ---------- */
+/* ---------- Logo & Cabeçalho Ajustado ---------- */
 .logo { 
     text-align: center; 
     margin-top: 10px; 
-    margin-bottom: 35px; 
+    margin-bottom: 30px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Estilo para a imagem da Logo */
+.logo-img {
+    max-width: 120px;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(197, 155, 39, 0.2));
+    transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.03);
 }
 
 .logo h1 { 
-    font-size: 28px; 
+    font-size: 24px; 
     font-weight: 800;
-    letter-spacing: 1.5px; 
+    letter-spacing: 1.2px; 
     text-transform: uppercase;
     background: var(--dourado-gradiente);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
-    filter: drop-shadow(0 2px 4px rgba(196, 154, 69, 0.15));
 }
 
-/* ---------- Formulários & Controles ---------- */
+/* ---------- Formulários & Entradas de Texto ---------- */
 label { 
     display: block; 
-    font-size: 13px; 
+    font-size: 12px; 
     font-weight: 700; 
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--texto-secundario);
+    letter-spacing: 0.6px;
+    color: var(--texto-corpo);
     margin-bottom: 8px; 
 }
 
 input, select, textarea {
     width: 100%;
     padding: 14px 16px;
-    border: 1.5px solid var(--borda-suave);
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
     font-size: 15px;
-    color: var(--texto-principal);
-    margin-bottom: 20px;
+    color: var(--texto-titulo);
+    margin-bottom: 18px;
     outline: none;
-    background: #fdfdfd;
+    background: #ffffff;
     font-family: inherit;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-input:hover, select:hover, textarea:hover {
-    border-color: #cbd5e1;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 input:focus, select:focus, textarea:focus { 
     border-color: var(--dourado-principal);
-    background: #ffffff;
-    box-shadow: var(--sombra-foco);
+    box-shadow: 0 0 0 4px rgba(197, 155, 39, 0.15);
 }
 
-/* ---------- Botão Principal Dourado ---------- */
+/* ---------- Botões Dourados Sem Defeito Visual ---------- */
 button {
     width: 100%;
-    padding: 16px;
-    border: none;
+    padding: 15px 24px;
+    border: none; /* Removida borda rígida para eliminar o contorno feio */
     border-radius: 12px;
     background: var(--dourado-gradiente);
     color: #ffffff;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.5px;
     cursor: pointer;
-    box-shadow: var(--sombra-dourada);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--sombra-pill-dourado);
+    transition: all 0.25s ease;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
-    overflow: hidden;
 }
 
 button:hover { 
     background: var(--dourado-gradiente-hover);
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px -4px rgba(196, 154, 69, 0.45);
+    box-shadow: 0 8px 20px rgba(197, 155, 39, 0.45);
 }
 
 button:active {
     transform: translateY(0);
-    box-shadow: var(--sombra-dourada);
+    box-shadow: var(--sombra-pill-dourado);
 }
 
 button:disabled { 
-    opacity: 0.65; 
+    opacity: 0.6; 
     cursor: not-allowed;
-    transform: none !important;
-    box-shadow: none !important;
-}
-
-/* ---------- Mensagens de Feedback ---------- */
-.mensagem { 
-    margin-top: 14px; 
-    font-size: 14px; 
-    font-weight: 600;
-    color: var(--vermelho-erro); 
-    background: var(--vermelho-fundo);
-    padding: 10px 14px;
-    border-radius: 8px;
-    text-align: center; 
-    min-height: 20px; 
-    border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.mensagem:empty {
-    display: none;
-}
-
-/* ---------- Topo (Cabeçalho do Usuário) ---------- */
-.topo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--borda-suave);
-}
-
-.topo .ola { 
-    font-size: 18px; 
-    font-weight: 700; 
-    color: var(--texto-principal);
-}
-
-.selo {
-    display: inline-block;
-    margin-top: 4px;
-    padding: 4px 12px;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    border-radius: 20px;
-    background: var(--dourado-claro-fundo);
-    color: var(--dourado-escuro);
-    border: 1px solid var(--dourado-borda);
-}
-
-.botao-sair {
-    width: auto;
-    padding: 9px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    background: #f1f5f9;
-    color: #475569;
-    box-shadow: none;
-    border-radius: 10px;
-}
-
-.botao-sair:hover {
-    background: #e2e8f0;
-    color: #1e293b;
-    box-shadow: none;
     transform: none;
+    box-shadow: none;
 }
 
-/* ---------- Menu de Navegação ---------- */
+/* ---------- Correção dos Botões Estilo "Pill" (Navegação / Dashboard) ---------- */
 .menu {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     overflow-x: auto;
     margin-bottom: 24px;
-    padding-bottom: 6px;
-    scrollbar-width: none; /* Firefox */
+    padding: 4px 2px 10px 2px; /* Espaçamento interno para a sombra não ser cortada nas pontas */
 }
 
-.menu::-webkit-scrollbar {
-    display: none; /* Chrome / Safari */
-}
+.menu::-webkit-scrollbar { display: none; }
 
+/* Formato em pílula perfeito igual ao da imagem, porém corrigido e suave */
 .menu a {
     flex: 0 0 auto;
-    padding: 10px 18px;
-    border-radius: 12px;
-    background: #f8fafc;
-    color: var(--texto-secundario);
+    padding: 10px 22px;
+    border-radius: 999px; /* Curva perfeita sem cantos pontudos */
+    background: #f1f5f9;
+    color: var(--texto-corpo);
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
-    border: 1px solid var(--borda-suave);
-    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
 }
 
 .menu a:hover {
-    background: #f1f5f9;
-    color: var(--texto-principal);
+    background: #e2e8f0;
+    color: var(--texto-titulo);
 }
 
+/* Estado ativo idêntico ao pílula dourada mas limpo e suave */
 .menu a.ativo { 
     background: var(--dourado-gradiente); 
     color: #ffffff; 
-    border-color: transparent;
-    box-shadow: 0 4px 12px rgba(196, 154, 69, 0.25);
+    box-shadow: var(--sombra-pill-dourado);
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Brilho interno discreto na borda */
 }
 
-/* ---------- Card de Saldo Principal ---------- */
+/* ---------- Cartão de Saldo Dourado ---------- */
 .saldo {
     background: var(--dourado-gradiente);
     color: #ffffff;
@@ -283,25 +221,11 @@ button:disabled {
     padding: 26px;
     text-align: center;
     margin-bottom: 20px;
-    box-shadow: var(--sombra-dourada);
-    position: relative;
-    overflow: hidden;
-}
-
-/* Detalhe estético metálico no card de saldo */
-.saldo::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 60%);
-    pointer-events: none;
+    box-shadow: var(--sombra-pill-dourado);
 }
 
 .saldo .rotulo { 
-    font-size: 13px; 
+    font-size: 12px; 
     text-transform: uppercase;
     letter-spacing: 1px;
     opacity: 0.9; 
@@ -309,194 +233,79 @@ button:disabled {
 }
 
 .saldo .valor { 
-    font-size: 36px; 
-    font-weight: 800; 
-    margin-top: 8px; 
-    letter-spacing: -0.5px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* ---------- Filtros de Período ---------- */
-.periodo-box { margin-bottom: 6px; }
-.periodo-box select { margin-bottom: 8px; }
-.periodo-nome { 
-    font-size: 13px; 
-    color: var(--texto-secundario); 
-    margin-bottom: 18px; 
-    text-align: center; 
-    font-weight: 500;
-}
-
-/* ---------- Gragil de Cards Resumo ---------- */
-.cards { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 14px; 
-    margin-bottom: 16px; 
-}
-
-.card {
-    border: 1px solid var(--borda-suave);
-    border-radius: 16px;
-    padding: 16px;
-    background: #fdfdfd;
-    box-shadow: var(--sombra-card);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px -6px rgba(0,0,0,0.07);
-}
-
-.card .rotulo { 
-    font-size: 12px; 
-    color: var(--texto-secundario); 
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.card .valor { 
-    font-size: 20px; 
+    font-size: 34px; 
     font-weight: 800; 
     margin-top: 6px; 
 }
 
+/* ---------- Topo e Perfis ---------- */
+.topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.topo .ola { font-size: 17px; font-weight: 700; color: var(--texto-titulo); }
+
+.selo {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 999px;
+    background: var(--dourado-fundo);
+    color: var(--dourado-escuro);
+    border: 1px solid var(--dourado-borda);
+}
+
+.botao-sair {
+    width: auto;
+    padding: 8px 16px;
+    font-size: 13px;
+    background: #f1f5f9;
+    color: var(--texto-corpo);
+    box-shadow: none;
+    border-radius: 8px;
+}
+
+.botao-sair:hover {
+    background: #e2e8f0;
+    box-shadow: none;
+    transform: none;
+}
+
+/* ---------- Cards Resumo ---------- */
+.cards { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 12px; 
+    margin-bottom: 16px; 
+}
+
+.card {
+    border: 1px solid var(--borda-fina);
+    border-radius: 14px;
+    padding: 16px;
+    background: #ffffff;
+    box-shadow: var(--sombra-card-suave);
+}
+
+.card .rotulo { font-size: 12px; color: #64748b; font-weight: 600; }
+.card .valor { font-size: 19px; font-weight: 800; margin-top: 4px; }
 .card.largo { grid-column: 1 / 3; }
 
-/* ---------- Cores de Transação ---------- */
-.verde { color: var(--verde-sucesso); }
-.vermelho { color: var(--vermelho-erro); }
-
-.secao-titulo { 
-    font-size: 16px; 
-    font-weight: 700; 
-    color: var(--texto-principal);
-    margin: 26px 0 14px; 
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* ---------- Gráfico Visual ---------- */
-.grafico {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 36px;
-    height: 180px;
-    border: 1px solid var(--borda-suave);
-    border-radius: 16px;
-    padding: 20px;
-    background: #fafbfc;
-    box-shadow: var(--sombra-card);
-}
-
-.coluna { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: flex-end; 
-    height: 100%; 
-    width: 80px; 
-}
-
-.barra { 
-    width: 100%; 
-    border-radius: 8px 8px 4px 4px; 
-    min-height: 4px; 
-    transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-}
-
-.barra.entrada { 
-    background: linear-gradient(180deg, #34d399 0%, #10b981 100%); 
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-}
-
-.barra.saida { 
-    background: linear-gradient(180deg, #f87171 0%, #ef4444 100%); 
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
-}
-
-.coluna .nome { 
-    font-size: 12px; 
-    font-weight: 600;
-    margin-top: 10px; 
-    color: var(--texto-secundario); 
-}
-
-/* ---------- Lista de Lançamentos ---------- */
-.lista { 
-    border: 1px solid var(--borda-suave); 
-    border-radius: 16px; 
-    overflow: hidden; 
-    background: #ffffff;
-    box-shadow: var(--sombra-card);
-}
-
-.item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--borda-suave);
-    transition: background 0.15s ease;
-}
-
-.item:hover {
-    background: #f8fafc;
-}
-
-.item:last-child { border-bottom: none; }
-
-.item .data { 
-    font-size: 11px; 
-    font-weight: 600;
-    color: #94a3b8; 
-    text-transform: uppercase;
-}
-
-.item .desc { 
-    font-size: 14px; 
-    font-weight: 700; 
-    color: var(--texto-principal);
-    margin-top: 2px; 
-}
-
-.item .cat { 
-    font-size: 12px; 
-    color: var(--texto-secundario); 
-    margin-top: 2px; 
-}
-
-.item .quanto { 
-    font-size: 15px; 
-    font-weight: 700; 
-    white-space: nowrap; 
-}
-
-.vazio { 
-    padding: 24px; 
-    text-align: center; 
-    font-size: 14px; 
-    color: var(--texto-secundario); 
-}
-
-.atualizacao { 
-    text-align: center; 
-    font-size: 12px; 
-    color: var(--texto-secundario); 
-    margin-top: 22px; 
-}
+.verde { color: #10b981; }
+.vermelho { color: #ef4444; }
 
 /* ---------- Rodapé ---------- */
 .footer { 
     text-align: center; 
     margin-top: auto;
-    padding-top: 30px; 
+    padding-top: 24px; 
     font-size: 12px; 
     color: #94a3b8; 
-    font-weight: 500;
 }
