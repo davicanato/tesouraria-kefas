@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesouraria Kefas</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 430px;
+            min-height: 100vh;
+            background: white;
+            padding: 30px 22px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-top: 60px;
+            margin-bottom: 45px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        .logo p {
+            margin-top: 8px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .login-box {
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 18px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #b08d3c;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #b08d3c;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="app">
+
+        <section class="logo">
+            <h1>Tesouraria Kefas</h1>
+            <p>Controle Financeiro</p>
+            <p>Ministério Apostólico Kefas</p>
+        </section>
+
+        <section class="login-box">
+
+            <label for="usuario">Usuário</label>
+            <input
+                type="text"
+                id="usuario"
+                placeholder="Digite seu usuário"
+            >
+
+            <label for="senha">Senha</label>
+            <input
+                type="password"
+                id="senha"
+                placeholder="Digite sua senha"
+            >
+
+            <button onclick="entrar()">
+                ENTRAR
+            </button>
+
+        </section>
+
+        <div class="footer">
+            Tesouraria Kefas © 2026
+        </div>
+
+    </main>
+
+    <script>
+        function entrar() {
+            alert("Login será conectado ao Supabase na próxima etapa.");
+        }
+    </script>
+
+</body>
+</html>
