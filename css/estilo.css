@@ -348,4 +348,10 @@ button:disabled {
 .atualizacao { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 20px; }
 
 /* ---------- Rodapé ---------- */
-.footer { text-align: center; margin-top: auto; padding-top: 30px; font-size: 12px; color: #94a3b8; }
+.footer { 
+    text-align: center; 
+    margin-top: 16px; /* Ajusta a margem para ficar logo abaixo do botão */
+    padding-top: 0;   /* Remove o espaçamento de 30px no topo */
+    font-size: 12px; 
+    color: #94a3b8; 
+}
