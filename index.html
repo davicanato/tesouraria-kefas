@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | M.A.K.E.L Tesouraria</title>
+    <title>M.A.K.E.L | Tesouraria</title>
     <link rel="stylesheet" href="css/estilo.css">
 </head>
 
@@ -13,68 +13,25 @@
 
         <section class="logo">
             <h1>Tesouraria | M.A.K.E.L</h1>
+            <!-- <p>Controle Financeiro Ministerial</p> -->
+            <!-- <p>Ministério Apostólico Kefas</p> -->
         </section>
 
-        <!-- Topo e menu (preenchidos pelo js/app.js) -->
-        <div class="topo">
-            <div>
-                <div id="ola" class="ola"></div>
-                <div id="selo" class="selo"></div>
-            </div>
-            <button id="botao-sair" class="botao-sair" type="button">SAIR</button>
-        </div>
+        <!-- TELA DE LOGIN -->
+        <section id="tela-login" class="oculto">
+            <form id="form-login">
+                <label for="usuario">Usuário</label>
+                <input type="text" id="usuario" placeholder="Digite seu usuário"
+                       autocomplete="username" autocapitalize="none" required>
 
-        <nav id="menu" class="menu"></nav>
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" placeholder="Digite sua senha"
+                       autocomplete="current-password" required>
 
-        <!-- ========== DASHBOARD ========== -->
-        <div class="saldo">
-            <div class="rotulo">Saldo atual</div>
-            <div id="saldo-valor" class="valor">R$ 0,00</div>
-        </div>
-
-        <div class="periodo-box">
-            <select id="periodo">
-                <option value="mes">Este mês</option>
-                <option value="mes_anterior">Mês anterior</option>
-                <option value="ano">Este ano</option>
-                <option value="tudo">Todo o período</option>
-            </select>
-            <div id="periodo-nome" class="periodo-nome"></div>
-        </div>
-
-        <div class="cards">
-            <div class="card">
-                <div class="rotulo">Entradas</div>
-                <div id="total-entradas" class="valor verde">R$ 0,00</div>
-            </div>
-            <div class="card">
-                <div class="rotulo">Saídas</div>
-                <div id="total-saidas" class="valor vermelho">R$ 0,00</div>
-            </div>
-            <div class="card largo">
-                <div class="rotulo">Resultado do período</div>
-                <div id="total-resultado" class="valor">R$ 0,00</div>
-            </div>
-        </div>
-
-        <div class="secao-titulo">Entradas x Saídas</div>
-        <div class="grafico">
-            <div class="coluna">
-                <div id="barra-entradas" class="barra entrada" style="height:3px"></div>
-                <div class="nome">Entradas</div>
-            </div>
-            <div class="coluna">
-                <div id="barra-saidas" class="barra saida" style="height:3px"></div>
-                <div class="nome">Saídas</div>
-            </div>
-        </div>
-
-        <div class="secao-titulo">Lançamentos recentes</div>
-        <div id="lista" class="lista"></div>
-
-        <div id="atualizacao" class="atualizacao"></div>
-        <div id="erro-dados" class="mensagem"></div>
-        <!-- ========== FIM DO DASHBOARD ========== -->
+                <button id="botao-entrar" type="submit">ENTRAR</button>
+                <div id="mensagem" class="mensagem"></div>
+            </form>
+        </section>
 
         <div class="footer">
             Aplicativo Oficial | Feito Por @davicanato1 <br>
@@ -87,51 +44,56 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/app.js"></script>
     <script>
+        const telaLogin = document.getElementById('tela-login');
+        const formLogin = document.getElementById('form-login');
+        const botaoEntrar = document.getElementById('botao-entrar');
+        const mensagem = document.getElementById('mensagem');
+
+        document.getElementById('ano-atual').textContent = new Date().getFullYear();
+
+        // Ao abrir: se já estiver logado, vai direto para o dashboard
         (async () => {
-            // Verifica o login e preenche topo e menu
-            const sessao = await iniciarPagina('dashboard.html');
-            if (!sessao) return;
+            const params = new URLSearchParams(window.location.search);
 
-            let lancamentos = [];
-            const seletorPeriodo = document.getElementById('periodo');
-
-            async function carregarDados() {
-                document.getElementById('erro-dados').textContent = '';
-
-                const { data, error } = await db
-                    .from('transactions')
-                    .select('id, tipo, valor, data, descricao, pessoa, updated_at, categories(nome)')
-                    .eq('excluido', false)
-                    .order('data', { ascending: false })
-                    .order('created_at', { ascending: false });
-
-                if (error) {
-                    document.getElementById('erro-dados').textContent =
-                        'Não foi possível carregar os lançamentos: ' + error.message;
+            if (params.get('erro') === 'perfil') {
+                mensagem.textContent = 'Perfil não encontrado. Fale com o administrador.';
+            } else {
+                const { data } = await db.auth.getSession();
+                if (data.session) {
+                    window.location.replace(PAGINA_INICIAL);
                     return;
                 }
-
-                lancamentos = data;
-                desenhar();
             }
 
-            function desenhar() {
-                // Saldo atual: soma de tudo
-                let saldo = 0;
-                lancamentos.forEach((l) => {
-                    saldo += l.tipo === 'entrada' ? Number(l.valor) : -Number(l.valor);
-                });
-                document.getElementById('saldo-valor').textContent = brl(saldo);
+            telaLogin.classList.remove('oculto');
+        })();
 
-                // Totais do período escolhido
-                const periodo = seletorPeriodo.value;
-                const [inicio, fim] = intervalo(periodo);
-                let entradas = 0;
-                let saidas = 0;
-                lancamentos.forEach((l) => {
-                    if (l.data >= inicio && l.data <= fim) {
-                        if (l.tipo === 'entrada') entradas += Number(l.valor);
-                        else saidas += Number(l.valor);
-                    }
-                });
-                const resultado = entradas - saidas;
+        formLogin.addEventListener('submit', async (evento) => {
+            evento.preventDefault();
+            mensagem.textContent = '';
+            botaoEntrar.disabled = true;
+            botaoEntrar.textContent = 'ENTRANDO...';
+
+            let email = document.getElementById('usuario').value.trim();
+            const senha = document.getElementById('senha').value;
+
+            // Se digitarem só "pastores", completa para pastores@kefas.com
+            if (!email.includes('@')) {
+                email = email.toLowerCase() + '@kefas.com';
+            }
+
+            const { error } = await db.auth.signInWithPassword({ email: email, password: senha });
+
+            if (error) {
+                botaoEntrar.disabled = false;
+                botaoEntrar.textContent = 'ENTRAR';
+                mensagem.textContent = 'Usuário ou senha incorretos.';
+                return;
+            }
+
+            window.location.replace(PAGINA_INICIAL);
+        });
+    </script>
+
+</body>
+</html>
