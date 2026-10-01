@@ -25,6 +25,16 @@
             border: 1px solid rgba(197, 155, 39, 0.25);
         }
         .bloco { border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; background: #ffffff; margin-bottom: 18px; }
+        .grupo {
+            padding: 9px 16px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #7a5c12;
+            background: #fbf8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
     </style>
 </head>
 <body>
@@ -46,9 +56,9 @@
             <div id="titulo-form" class="secao-titulo" style="margin-top:0">Novo membro</div>
             <form id="form-membro">
                 <label for="nome">Nome</label>
-                <input type="text" id="nome" placeholder="Ex.: Davi..">
+                <input type="text" id="nome" placeholder="Ex.: Ademir Silva">
 
-                <label>Tags</label>
+                <label>Tags (na ordem da hierarquia)</label>
                 <div id="tags-form" class="bloco"></div>
 
                 <button id="botao-salvar" type="submit">SALVAR</button>
@@ -64,7 +74,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
             <div>
                 <label for="busca">Buscar nome</label>
-                <input type="text" id="busca" placeholder="Ex.: Davi">
+                <input type="text" id="busca" placeholder="Ex.: ade">
             </div>
             <div>
                 <label for="filtro-tag">Tag</label>
@@ -77,6 +87,9 @@
         <!-- ===== SÓ ADMIN: gerenciar tags ===== -->
         <div id="admin-tags" class="oculto">
             <div class="secao-titulo">Gerenciar tags</div>
+            <div class="periodo-nome" style="text-align:left;margin-bottom:10px">
+                Da mais alta para a mais baixa. Use ▲ ▼ para mudar a posição. Tags novas entram logo acima de "Membro".
+            </div>
             <form id="form-tag" style="display:flex;gap:8px;align-items:flex-start">
                 <input type="text" id="tag-nome" placeholder="Nova tag. Ex.: Louvor" style="margin-bottom:0">
                 <button type="submit" style="width:auto;padding:14px 18px">ADICIONAR</button>
@@ -101,7 +114,8 @@
 
         const ehAdmin = sessao.perfil.role === 'admin';
         const el = (id) => document.getElementById(id);
-        const ordem = (a, b) => a.nome.localeCompare(b.nome, 'pt-BR');
+        const porNome = (a, b) => a.nome.localeCompare(b.nome, 'pt-BR');
+        const porHierarquia = (a, b) => (a.ordem - b.ordem) || porNome(a, b);
         let membros = [];
         let tags = [];
         let idEditando = null;
@@ -124,17 +138,25 @@
             return b;
         }
 
+        // Tags de um membro, da mais alta para a mais baixa
+        function tagsDoMembro(m) {
+            return m.members_tags
+                .map((x) => tags.find((t) => t.id === x.tag_id))
+                .filter(Boolean)
+                .sort(porHierarquia);
+        }
+
         // ---------- Carregar dados ----------
         async function carregar() {
             const r1 = await db.from('members')
                 .select('id, nome, ativo, members_tags(tag_id)').order('nome');
-            const r2 = await db.from('member_tags').select('id, nome').order('nome');
+            const r2 = await db.from('member_tags').select('id, nome, ordem');
             if (r1.error || r2.error) {
                 aviso('msg', 'Erro ao carregar: ' + (r1.error || r2.error).message, false);
                 return;
             }
-            membros = r1.data.sort(ordem);
-            tags = r2.data.sort(ordem);
+            membros = r1.data.sort(porNome);
+            tags = r2.data.sort(porHierarquia);
             desenharFiltroTags();
             desenharTagsForm(marcados());
             desenharListaTags();
@@ -183,7 +205,60 @@
             });
         }
 
-        // ---------- Lista de membros ----------
+        // ---------- Lista de membros, agrupada pela hierarquia ----------
+        function cartaoMembro(m) {
+            const item = document.createElement('div');
+            item.className = 'item';
+
+            const esq = document.createElement('div');
+            const nome = document.createElement('div');
+            nome.className = 'desc';
+            nome.textContent = m.nome + (m.ativo ? '' : ' (desativado)');
+            if (!m.ativo) nome.style.color = '#94a3b8';
+            esq.appendChild(nome);
+
+            const linhaTags = document.createElement('div');
+            tagsDoMembro(m).forEach((t) => {
+                const c = document.createElement('span');
+                c.className = 'chip';
+                c.textContent = t.nome;
+                linhaTags.appendChild(c);
+            });
+            esq.appendChild(linhaTags);
+            item.appendChild(esq);
+
+            if (ehAdmin) {
+                const acoes = document.createElement('div');
+                acoes.style.whiteSpace = 'nowrap';
+
+                const bEditar = botaoPequeno('Editar', 'var(--dourado-principal)');
+                bEditar.addEventListener('click', () => {
+                    idEditando = m.id;
+                    el('nome').value = m.nome;
+                    desenharTagsForm(new Set(m.members_tags.map((x) => x.tag_id)));
+                    el('titulo-form').textContent = 'Editando membro';
+                    el('botao-salvar').textContent = 'SALVAR ALTERAÇÕES';
+                    el('botao-cancelar').classList.remove('oculto');
+                    el('msg').textContent = '';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                const bAtivo = botaoPequeno(m.ativo ? 'Desativar' : 'Reativar', m.ativo ? '#ef4444' : '#10b981');
+                bAtivo.addEventListener('click', async () => {
+                    if (m.ativo && !confirm('Desativar "' + m.nome + '"? Ele sai das listas de escolha, mas o histórico de lançamentos continua.')) return;
+                    const { error } = await db.from('members').update({ ativo: !m.ativo }).eq('id', m.id);
+                    if (error) { aviso('msg', 'Erro: ' + error.message, false); return; }
+                    aviso('msg', m.ativo ? 'Membro desativado.' : 'Membro reativado.', true);
+                    carregar();
+                });
+
+                acoes.appendChild(bEditar);
+                acoes.appendChild(bAtivo);
+                item.appendChild(acoes);
+            }
+            return item;
+        }
+
         function desenharMembros() {
             const termo = el('busca').value.trim().toLowerCase();
             const tagId = el('filtro-tag').value;
@@ -197,8 +272,6 @@
                 return true;
             });
 
-            // ativos primeiro, desativados no final (só o admin vê)
-            visiveis.sort((a, b) => (a.ativo === b.ativo ? 0 : a.ativo ? -1 : 1));
             el('contagem').textContent = 'Membros (' + visiveis.length + ')';
 
             if (visiveis.length === 0) {
@@ -206,62 +279,27 @@
                 return;
             }
 
+            // Cada membro vai para o grupo da sua tag mais alta
+            const grupos = new Map();
+            const SEM_TAG = 'sem-tag';
+            const DESATIVADOS = 'desativados';
+            tags.forEach((t) => grupos.set(t.id, { titulo: t.nome, itens: [] }));
+            grupos.set(SEM_TAG, { titulo: 'Sem tag', itens: [] });
+            grupos.set(DESATIVADOS, { titulo: 'Desativados', itens: [] });
+
             visiveis.forEach((m) => {
-                const item = document.createElement('div');
-                item.className = 'item';
+                if (!m.ativo) { grupos.get(DESATIVADOS).itens.push(m); return; }
+                const principal = tagsDoMembro(m)[0];
+                grupos.get(principal ? principal.id : SEM_TAG).itens.push(m);
+            });
 
-                const esq = document.createElement('div');
-                const nome = document.createElement('div');
-                nome.className = 'desc';
-                nome.textContent = m.nome + (m.ativo ? '' : ' (desativado)');
-                if (!m.ativo) nome.style.color = '#94a3b8';
-                esq.appendChild(nome);
-
-                const donoDasTags = document.createElement('div');
-                m.members_tags
-                    .map((x) => tags.find((t) => t.id === x.tag_id))
-                    .filter(Boolean)
-                    .sort(ordem)
-                    .forEach((t) => {
-                        const c = document.createElement('span');
-                        c.className = 'chip';
-                        c.textContent = t.nome;
-                        donoDasTags.appendChild(c);
-                    });
-                esq.appendChild(donoDasTags);
-                item.appendChild(esq);
-
-                if (ehAdmin) {
-                    const acoes = document.createElement('div');
-                    acoes.style.whiteSpace = 'nowrap';
-
-                    const bEditar = botaoPequeno('Editar', 'var(--dourado-principal)');
-                    bEditar.addEventListener('click', () => {
-                        idEditando = m.id;
-                        el('nome').value = m.nome;
-                        desenharTagsForm(new Set(m.members_tags.map((x) => x.tag_id)));
-                        el('titulo-form').textContent = 'Editando membro';
-                        el('botao-salvar').textContent = 'SALVAR ALTERAÇÕES';
-                        el('botao-cancelar').classList.remove('oculto');
-                        el('msg').textContent = '';
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    });
-
-                    const bAtivo = botaoPequeno(m.ativo ? 'Desativar' : 'Reativar', m.ativo ? '#ef4444' : '#10b981');
-                    bAtivo.addEventListener('click', async () => {
-                        if (m.ativo && !confirm('Desativar "' + m.nome + '"? Ele sai das listas de escolha, mas o histórico de lançamentos continua.')) return;
-                        const { error } = await db.from('members').update({ ativo: !m.ativo }).eq('id', m.id);
-                        if (error) { aviso('msg', 'Erro: ' + error.message, false); return; }
-                        aviso('msg', m.ativo ? 'Membro desativado.' : 'Membro reativado.', true);
-                        carregar();
-                    });
-
-                    acoes.appendChild(bEditar);
-                    acoes.appendChild(bAtivo);
-                    item.appendChild(acoes);
-                }
-
-                lista.appendChild(item);
+            grupos.forEach((g) => {
+                if (g.itens.length === 0) return;
+                const titulo = document.createElement('div');
+                titulo.className = 'grupo';
+                titulo.textContent = g.titulo + ' (' + g.itens.length + ')';
+                lista.appendChild(titulo);
+                g.itens.forEach((m) => lista.appendChild(cartaoMembro(m)));
             });
         }
 
@@ -323,6 +361,27 @@
         });
 
         // ---------- Gerenciar tags ----------
+        async function mover(posicao, passo) {
+            const outra = posicao + passo;
+            if (outra < 0 || outra >= tags.length) return;
+            const arr = tags.slice();
+            const guardada = arr[posicao];
+            arr[posicao] = arr[outra];
+            arr[outra] = guardada;
+
+            // Renumera 10, 20, 30... e grava só o que mudou
+            const mudancas = [];
+            arr.forEach((t, k) => {
+                const nova = (k + 1) * 10;
+                if (t.ordem !== nova) mudancas.push({ id: t.id, ordem: nova });
+            });
+            const resultados = await Promise.all(mudancas.map((u) =>
+                db.from('member_tags').update({ ordem: u.ordem }).eq('id', u.id)));
+            const falha = resultados.find((r) => r.error);
+            if (falha) { aviso('msg-tag', 'Erro: ' + falha.error.message, false); return; }
+            carregar();
+        }
+
         function desenharListaTags() {
             const lista = el('lista-tags');
             lista.innerHTML = '';
@@ -330,7 +389,7 @@
                 lista.innerHTML = '<div class="vazio">Nenhuma tag.</div>';
                 return;
             }
-            tags.forEach((t) => {
+            tags.forEach((t, posicao) => {
                 const quantos = membros.filter((m) => m.members_tags.some((x) => x.tag_id === t.id)).length;
                 const item = document.createElement('div');
                 item.className = 'item';
@@ -338,7 +397,7 @@
                 const esq = document.createElement('div');
                 const nome = document.createElement('div');
                 nome.className = 'desc';
-                nome.textContent = t.nome;
+                nome.textContent = (posicao + 1) + '. ' + t.nome;
                 const qt = document.createElement('div');
                 qt.className = 'cat';
                 qt.textContent = quantos + (quantos === 1 ? ' membro' : ' membros');
@@ -347,6 +406,14 @@
 
                 const acoes = document.createElement('div');
                 acoes.style.whiteSpace = 'nowrap';
+
+                const bSobe = botaoPequeno('▲', '#64748b');
+                bSobe.disabled = posicao === 0;
+                bSobe.addEventListener('click', () => mover(posicao, -1));
+
+                const bDesce = botaoPequeno('▼', '#64748b');
+                bDesce.disabled = posicao === tags.length - 1;
+                bDesce.addEventListener('click', () => mover(posicao, 1));
 
                 const bRenomear = botaoPequeno('Renomear', 'var(--dourado-principal)');
                 bRenomear.addEventListener('click', async () => {
@@ -372,6 +439,8 @@
                     carregar();
                 });
 
+                acoes.appendChild(bSobe);
+                acoes.appendChild(bDesce);
                 acoes.appendChild(bRenomear);
                 acoes.appendChild(bExcluir);
                 item.appendChild(esq);
@@ -384,7 +453,13 @@
             e.preventDefault();
             const nome = el('tag-nome').value.trim();
             if (!nome) { aviso('msg-tag', 'Digite o nome da tag.', false); return; }
-            const { error } = await db.from('member_tags').insert({ nome: nome });
+
+            // Tag nova entra logo acima de "Membro"
+            const membro = tags.find((t) => t.nome.toLowerCase() === 'membro');
+            const maior = tags.reduce((x, t) => Math.max(x, t.ordem), 0);
+            const ordem = membro ? membro.ordem - 5 : maior + 10;
+
+            const { error } = await db.from('member_tags').insert({ nome: nome, ordem: ordem });
             if (error) {
                 aviso('msg-tag', error.code === '23505' ? 'Já existe uma tag com esse nome.' : 'Erro: ' + error.message, false);
                 return;
@@ -393,9 +468,3 @@
             aviso('msg-tag', 'Tag criada!', true);
             carregar();
         });
-
-        carregar();
-    })();
-    </script>
-</body>
-</html>
