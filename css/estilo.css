@@ -1,36 +1,31 @@
 /* =====================================================
    TESOURARIA KEFAS - ESTILO PREMIUM DEFINITIVO
-   - Sem artefatos ou quadrados atrás dos botões
-   - Cards de lançamentos separados (Estilo Foto 1)
-   - Degradê Dourado de Alta Definição
+   - Sombra 100% acompanhando a curva (Sem quadrado no fundo)
+   - Lançamentos em cards separados estilo executivo
+   - Degradê Dourado Metálico Limpo
    ===================================================== */
 
-/* ---------- Variáveis de Cores e Sombras ---------- */
+/* ---------- Variáveis Globais ---------- */
 :root {
-    /* Degradê Dourado Limpo e Sem Ruído */
     --dourado-gradiente: linear-gradient(135deg, #d4af37 0%, #c59b27 50%, #a37c1e 100%);
     --dourado-gradiente-hover: linear-gradient(135deg, #e5be48 0%, #d6ac38 50%, #b48d2f 100%);
     
-    /* Cores de Apoio */
     --dourado-principal: #c59b27;
     --dourado-escuro: #7a5c12;
     --dourado-fundo-suave: #fbf8f0;
     --dourado-borda: rgba(197, 155, 39, 0.25);
     
-    /* Neutros */
     --bg-pagina: #f1f3f6;
     --card-fundo: #ffffff;
     --texto-titulo: #0f172a;
     --texto-corpo: #475569;
     --borda-fina: #e2e8f0;
     
-    /* Entradas e Saídas */
     --verde-entrada: #10b981;
     --vermelho-saida: #ef4444;
 
-    /* Sombra Suave (Sem sombras quadradas vazadas) */
-    --sombra-botao: 0 4px 12px rgba(197, 155, 39, 0.3);
-    --sombra-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+    /* Sombra limpa e suave para os cards */
+    --sombra-card: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
 /* ---------- Resets Globais ---------- */
@@ -131,7 +126,7 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 0 3px rgba(197, 155, 39, 0.15);
 }
 
-/* ---------- Botões Gerais ---------- */
+/* ---------- Botões Principais (Sem Sombra Quadrada) ---------- */
 button {
     width: 100%;
     padding: 15px;
@@ -142,13 +137,14 @@ button {
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: var(--sombra-botao);
-    transition: transform 0.2s, background 0.2s;
-    isolation: isolate; /* Evita fundo quadrado ou artefato sob o botão */
+    box-shadow: none !important;
+    filter: drop-shadow(0px 4px 6px rgba(140, 95, 15, 0.25)); /* Sombra totalmente moldada ao botão */
+    transition: transform 0.2s, filter 0.2s, background 0.2s;
 }
 
 button:hover { 
     background: var(--dourado-gradiente-hover);
+    filter: drop-shadow(0px 6px 10px rgba(140, 95, 15, 0.35));
     transform: translateY(-1px);
 }
 
@@ -156,6 +152,7 @@ button:disabled {
     opacity: 0.6; 
     cursor: wait;
     transform: none;
+    filter: none;
 }
 
 .mensagem { 
@@ -194,7 +191,8 @@ button:disabled {
     font-size: 13px;
     background: #f1f5f9;
     color: var(--texto-corpo);
-    box-shadow: none;
+    box-shadow: none !important;
+    filter: none !important;
     border-radius: 8px;
 }
 
@@ -204,16 +202,16 @@ button:disabled {
     gap: 8px;
     overflow-x: auto;
     margin-bottom: 22px;
-    padding: 2px 2px 8px 2px;
-    background: transparent !important; /* Remove qualquer quadrado de fundo do container */
+    padding: 4px 4px 10px 4px;
+    background: transparent !important;
 }
 
 .menu::-webkit-scrollbar { display: none; }
 
 .menu a {
     flex: 0 0 auto;
-    padding: 10px 20px;
-    border-radius: 30px; /* Pílula arredondada */
+    padding: 10px 22px;
+    border-radius: 50px; /* Formato de pílula arredondada perfeita */
     background: #f1f5f9;
     color: var(--texto-corpo);
     text-decoration: none;
@@ -222,7 +220,8 @@ button:disabled {
     transition: all 0.2s ease;
     border: none;
     outline: none;
-    isolation: isolate; /* CORREÇÃO: Impede renderização de fundo quadrado */
+    box-shadow: none !important;
+    filter: none;
 }
 
 .menu a:hover {
@@ -230,11 +229,12 @@ button:disabled {
     color: var(--texto-titulo);
 }
 
-/* Botão Ativo (Dourado Sem Quadrado Atrás) */
+/* ---------- BOTÃO ATIVO (Zero quadrado no fundo) ---------- */
 .menu a.ativo { 
     background: var(--dourado-gradiente); 
     color: #ffffff; 
-    box-shadow: var(--sombra-botao);
+    box-shadow: none !important; /* Remove totalmente o box-shadow retangular */
+    filter: drop-shadow(0px 3px 6px rgba(140, 95, 15, 0.28)); /* Sombra arredondada limpa */
 }
 
 /* ---------- Card de Saldo ---------- */
@@ -245,7 +245,7 @@ button:disabled {
     padding: 24px;
     text-align: center;
     margin-bottom: 20px;
-    box-shadow: var(--sombra-botao);
+    filter: drop-shadow(0px 4px 8px rgba(140, 95, 15, 0.2));
 }
 
 .saldo .rotulo { font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.9; }
@@ -292,7 +292,7 @@ button:disabled {
 .barra.saida { background: var(--vermelho-saida); }
 .coluna .nome { font-size: 12px; margin-top: 8px; color: var(--texto-corpo); font-weight: 600; }
 
-/* ---------- LISTA DE LANÇAMENTOS (RESTAURADA E SEPARADA COMO NA FOTO 1) ---------- */
+/* ---------- Lista de Lançamentos ---------- */
 .lista { 
     border: 1px solid var(--borda-fina); 
     border-radius: 16px; 
