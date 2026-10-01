@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saídas | M.A.K.E.L Tesouraria</title>
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+    <main class="app">
+
+        <section class="logo"><h1>Tesouraria | M.A.K.E.L</h1></section>
+
+        <div class="topo">
+            <div>
+                <div id="ola" class="ola"></div>
+                <div id="selo" class="selo"></div>
+            </div>
+            <button id="botao-sair" class="botao-sair" type="button">SAIR</button>
+        </div>
+        <nav id="menu" class="menu"></nav>
+
+        <div id="titulo-form" class="secao-titulo">Nova saída</div>
+
+        <form id="form-lanc">
+            <label for="categoria">Categoria</label>
+            <select id="categoria"></select>
+
+            <label for="pessoa">Fornecedor / quem recebeu (opcional)</label>
+            <input type="text" id="pessoa" placeholder="Ex.: CPFL">
+
+            <label for="valor">Valor (R$)</label>
+            <input type="text" id="valor" inputmode="decimal" placeholder="Ex.: 380,00">
+
+            <label for="data">Data</label>
+            <input type="date" id="data">
+
+            <label for="descricao">Descrição</label>
+            <input type="text" id="descricao" placeholder="Ex.: Conta de energia">
+
+            <label for="forma">Forma de pagamento</label>
+            <select id="forma">
+                <option value="dinheiro">Dinheiro</option>
+                <option value="pix">PIX</option>
+                <option value="transferencia">Transferência</option>
+                <option value="outro">Outro</option>
+            </select>
+
+            <label for="observacoes">Observações (opcional)</label>
+            <textarea id="observacoes" rows="2"></textarea>
+
+            <button id="botao-salvar" type="submit">SALVAR</button>
+            <button id="botao-cancelar" type="button" class="oculto"
+                    style="margin-top:10px;background:#eeeeee;color:#444">CANCELAR EDIÇÃO</button>
+            <div id="msg" class="mensagem"></div>
+        </form>
+
+        <div class="secao-titulo">Últimas saídas</div>
+        <div id="lista-lanc" class="lista"></div>
+
+        <div class="footer">
+            Aplicativo Oficial | Feito Por @davicanato1 <br>
+            Ministério Apostólico Kefas Lavradas ©<span id="ano-atual">2026</span> <br>
+            <center> CNPJ | 56.797.417/0001-81 </center>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+    <script src="js/lancamento.js"></script>
+    <script>iniciarLancamento('saida', 'saidas.html');</script>
+</body>
+</html>
