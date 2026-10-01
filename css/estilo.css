@@ -1,6 +1,6 @@
 /* =====================================================
    TESOURARIA KEFAS - ESTILO PREMIUM DEFINITIVO
-   - Sombra 100% acompanhando a curva (Sem quadrado no fundo)
+   - Menu (Dashboard, Entradas, Saídas) 100% Plano (Zero Sombra/Brilho)
    - Lançamentos em cards separados estilo executivo
    - Degradê Dourado Metálico Limpo
    ===================================================== */
@@ -24,7 +24,6 @@
     --verde-entrada: #10b981;
     --vermelho-saida: #ef4444;
 
-    /* Sombra limpa e suave para os cards */
     --sombra-card: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
@@ -84,7 +83,6 @@ body {
     max-width: 100px;
     height: auto;
     object-fit: contain;
-    filter: drop-shadow(0 4px 8px rgba(197, 155, 39, 0.2));
 }
 
 .logo h1 { 
@@ -126,7 +124,7 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 0 3px rgba(197, 155, 39, 0.15);
 }
 
-/* ---------- Botões Principais (Sem Sombra Quadrada) ---------- */
+/* ---------- Botões Grandes do Formulário ---------- */
 button {
     width: 100%;
     padding: 15px;
@@ -137,14 +135,12 @@ button {
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: none !important;
-    filter: drop-shadow(0px 4px 6px rgba(140, 95, 15, 0.25)); /* Sombra totalmente moldada ao botão */
-    transition: transform 0.2s, filter 0.2s, background 0.2s;
+    box-shadow: 0 4px 12px rgba(197, 155, 39, 0.2);
+    transition: transform 0.2s, background 0.2s;
 }
 
 button:hover { 
     background: var(--dourado-gradiente-hover);
-    filter: drop-shadow(0px 6px 10px rgba(140, 95, 15, 0.35));
     transform: translateY(-1px);
 }
 
@@ -152,7 +148,6 @@ button:disabled {
     opacity: 0.6; 
     cursor: wait;
     transform: none;
-    filter: none;
 }
 
 .mensagem { 
@@ -192,17 +187,19 @@ button:disabled {
     background: #f1f5f9;
     color: var(--texto-corpo);
     box-shadow: none !important;
-    filter: none !important;
     border-radius: 8px;
 }
 
-/* ---------- Menu de Navegação (Dashboard, Entradas, Saídas) ---------- */
+/* =====================================================
+   MENU DE NAVEGAÇÃO (DASHBOARD, ENTRADAS, SAÍDAS)
+   --> SEM BRILHO, SEM SOMBRA, SEM MANCHA NO FUNDO <--
+   ===================================================== */
 .menu {
     display: flex;
     gap: 8px;
     overflow-x: auto;
     margin-bottom: 22px;
-    padding: 4px 4px 10px 4px;
+    padding: 0;
     background: transparent !important;
 }
 
@@ -211,17 +208,20 @@ button:disabled {
 .menu a {
     flex: 0 0 auto;
     padding: 10px 22px;
-    border-radius: 50px; /* Formato de pílula arredondada perfeita */
+    border-radius: 50px;
     background: #f1f5f9;
     color: var(--texto-corpo);
     text-decoration: none;
     font-size: 14px;
     font-weight: 700;
-    transition: all 0.2s ease;
+    transition: background 0.2s, color 0.2s;
     border: none;
     outline: none;
+    
+    /* REMOVIDO TOTALMENTE BRILHO / SOMBRA */
     box-shadow: none !important;
-    filter: none;
+    filter: none !important;
+    -webkit-filter: none !important;
 }
 
 .menu a:hover {
@@ -229,12 +229,15 @@ button:disabled {
     color: var(--texto-titulo);
 }
 
-/* ---------- BOTÃO ATIVO (Zero quadrado no fundo) ---------- */
+/* --- BOTÃO ATIVO (TOTALMENTE PLANO / ZERO SOMBRA) --- */
 .menu a.ativo { 
     background: var(--dourado-gradiente); 
     color: #ffffff; 
-    box-shadow: none !important; /* Remove totalmente o box-shadow retangular */
-    filter: drop-shadow(0px 3px 6px rgba(140, 95, 15, 0.28)); /* Sombra arredondada limpa */
+    
+    /* GARANTE ZERO SOMBRA / BRILHO */
+    box-shadow: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
 }
 
 /* ---------- Card de Saldo ---------- */
@@ -245,7 +248,6 @@ button:disabled {
     padding: 24px;
     text-align: center;
     margin-bottom: 20px;
-    filter: drop-shadow(0px 4px 8px rgba(140, 95, 15, 0.2));
 }
 
 .saldo .rotulo { font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.9; }
