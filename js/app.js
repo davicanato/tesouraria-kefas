@@ -17,8 +17,8 @@ const PAGINA_INICIAL = 'dashboard.html';
 // soAdmin: true -> só o Administrador vê e acessa
 const PAGINAS = [
     { arquivo: 'dashboard.html',     nome: 'Dashboard',     soAdmin: false, pronta: true  },
-    { arquivo: 'entradas.html',      nome: 'Entradas',      soAdmin: true,  pronta: false },
-    { arquivo: 'saidas.html',        nome: 'Saídas',        soAdmin: true,  pronta: false },
+    { arquivo: 'entradas.html',      nome: 'Entradas',      soAdmin: true,  pronta: true },
+    { arquivo: 'saidas.html',        nome: 'Saídas',        soAdmin: true,  pronta: true },
     { arquivo: 'historico.html',     nome: 'Histórico',     soAdmin: false, pronta: false },
     { arquivo: 'relatorios.html',    nome: 'Relatórios',    soAdmin: false, pronta: false },
     { arquivo: 'configuracoes.html', nome: 'Configurações', soAdmin: true,  pronta: false }
