@@ -1,1 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | M.A.K.E.L Tesouraria</title>
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
 
+<body>
+
+    <main class="app">
+
+        <section class="logo">
+            <h1>Tesouraria | M.A.K.E.L</h1>
+        </section>
+
+        <!-- Topo e menu (preenchidos pelo js/app.js) -->
+        <div class="topo">
+            <div>
+                <div id="ola" class="ola"></div>
+                <div id="selo" class="selo"></div>
+            </div>
+            <button id="botao-sair" class="botao-sair" type="button">SAIR</button>
+        </div>
+
+        <nav id="menu" class="menu"></nav>
+
+        <!-- ========== DASHBOARD ========== -->
+        <div class="saldo">
+            <div class="rotulo">Saldo atual</div>
+            <div id="saldo-valor" class="valor">R$ 0,00</div>
+        </div>
+
+        <div class="periodo-box">
+            <select id="periodo">
+                <option value="mes">Este mês</option>
+                <option value="mes_anterior">Mês anterior</option>
+                <option value="ano">Este ano</option>
+                <option value="tudo">Todo o período</option>
+            </select>
+            <div id="periodo-nome" class="periodo-nome"></div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <div class="rotulo">Entradas</div>
+                <div id="total-entradas" class="valor verde">R$ 0,00</div>
+            </div>
+            <div class="card">
+                <div class="rotulo">Saídas</div>
+                <div id="total-saidas" class="valor vermelho">R$ 0,00</div>
+            </div>
+            <div class="card largo">
+                <div class="rotulo">Resultado do período</div>
+                <div id="total-resultado" class="valor">R$ 0,00</div>
+            </div>
+        </div>
+
+        <div class="secao-titulo">Entradas x Saídas</div>
+        <div class="grafico">
+            <div class="coluna">
+                <div id="barra-entradas" class="barra entrada" style="height:3px"></div>
+                <div class="nome">Entradas</div>
+            </div>
+            <div class="coluna">
+                <div id="barra-saidas" class="barra saida" style="height:3px"></div>
+                <div class="nome">Saídas</div>
+            </div>
+        </div>
+
+        <div class="secao-titulo">Lançamentos recentes</div>
+        <div id="lista" class="lista"></div>
+
+        <div id="atualizacao" class="atualizacao"></div>
+        <div id="erro-dados" class="mensagem"></div>
+        <!-- ========== FIM DO DASHBOARD ========== -->
+
+        <div class="footer">
+            Aplicativo Oficial | Feito Por @davicanato1 <br>
+            Ministério Apostólico Kefas Lavradas ©<span id="ano-atual">2026</span> <br>
+            <center> CNPJ | 56.797.417/0001-81 </center>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+    <script>
+        (async () => {
+            // Verifica o login e preenche topo e menu
+            const sessao = await iniciarPagina('dashboard.html');
+            if (!sessao) return;
+
+            let lancamentos = [];
+            const seletorPeriodo = document.getElementById('periodo');
+
+            async function carregarDados() {
+                document.getElementById('erro-dados').textContent = '';
+
+                const { data, error } = await db
+                    .from('transactions')
+                    .select('id, tipo, valor, data, descricao, pessoa, updated_at, categories(nome)')
+                    .eq('excluido', false)
+                    .order('data', { ascending: false })
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    document.getElementById('erro-dados').textContent =
+                        'Não foi possível carregar os lançamentos: ' + error.message;
+                    return;
+                }
+
+                lancamentos = data;
+                desenhar();
+            }
+
+            function desenhar() {
+                // Saldo atual: soma de tudo
+                let saldo = 0;
+                lancamentos.forEach((l) => {
+                    saldo += l.tipo === 'entrada' ? Number(l.valor) : -Number(l.valor);
+                });
+                document.getElementById('saldo-valor').textContent = brl(saldo);
+
+                // Totais do período escolhido
+                const periodo = seletorPeriodo.value;
+                const [inicio, fim] = intervalo(periodo);
+                let entradas = 0;
+                let saidas = 0;
+                lancamentos.forEach((l) => {
+                    if (l.data >= inicio && l.data <= fim) {
+                        if (l.tipo === 'entrada') entradas += Number(l.valor);
+                        else saidas += Number(l.valor);
+                    }
+                });
+                const resultado = entradas - saidas;
+
+                document.getElementById('periodo-nome').textContent = nomeDoPeriodo(periodo);
+                document.getElementById('total-entradas').textContent = brl(entradas);
+                document.getElementById('total-saidas').textContent = brl(saidas);
+
+                const elResultado = document.getElementById('total-resultado');
+                elResultado.textContent = brl(resultado);
+                elResultado.className = 'valor ' + (resultado >= 0 ? 'verde' : 'vermelho');
+
+                // Gráfico
+                const maior = Math.max(entradas, saidas);
+                const altura = (v) => (maior === 0 ? 3 : Math.max(3, Math.round((v / maior) * 110)));
+                document.getElementById('barra-entradas').style.height = altura(entradas) + 'px';
+                document.getElementById('barra-saidas').style.height = altura(saidas) + 'px';
+
+                // Lançamentos recentes (10 mais novos)
+                const lista = document.getElementById('lista');
+                lista.innerHTML = '';
+                if (lancamentos.length === 0) {
+                    const vazio = document.createElement('div');
+                    vazio.className = 'vazio';
+                    vazio.textContent = 'Nenhum lançamento ainda.';
+                    lista.appendChild(vazio);
+                }
+                lancamentos.slice(0, 10).forEach((l) => {
+                    const item = document.createElement('div');
+                    item.className = 'item';
+
+                    const esquerda = document.createElement('div');
+                    const elData = document.createElement('div');
+                    elData.className = 'data';
+                    elData.textContent = dataBR(l.data) + (l.pessoa ? ' • ' + l.pessoa : '');
+                    const desc = document.createElement('div');
+                    desc.className = 'desc';
+                    desc.textContent = l.descricao || '(sem descrição)';
+                    const cat = document.createElement('div');
+                    cat.className = 'cat';
+                    cat.textContent = l.categories ? l.categories.nome : '';
+                    esquerda.appendChild(elData);
+                    esquerda.appendChild(desc);
+                    esquerda.appendChild(cat);
+
+                    const quanto = document.createElement('div');
+                    const positivo = l.tipo === 'entrada';
+                    quanto.className = 'quanto ' + (positivo ? 'verde' : 'vermelho');
+                    quanto.textContent = (positivo ? '+ ' : '- ') + brl(l.valor);
+
+                    item.appendChild(esquerda);
+                    item.appendChild(quanto);
+                    lista.appendChild(item);
+                });
+
+                // Última atualização
+                const el = document.getElementById('atualizacao');
+                if (lancamentos.length === 0) {
+                    el.textContent = '';
+                } else {
+                    let maisRecente = lancamentos[0].updated_at;
+                    lancamentos.forEach((l) => { if (l.updated_at > maisRecente) maisRecente = l.updated_at; });
+                    const d = new Date(maisRecente);
+                    el.textContent = 'Última atualização: ' +
+                        pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() +
+                        ' às ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+                }
+            }
+
+            seletorPeriodo.addEventListener('change', desenhar);
+            carregarDados();
+        })();
+    </script>
+
+</body>
+</html>
