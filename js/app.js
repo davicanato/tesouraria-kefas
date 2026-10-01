@@ -143,3 +143,41 @@ function preencherTopo(perfil, arquivoAtual) {
     const ano = document.getElementById('ano-atual');
     if (ano) ano.textContent = new Date().getFullYear();
 }
+
+
+let instaladorPWA;
+const btnInstalar = document.getElementById('btnInstalar');
+
+// O navegador deteta que o site pode ser instalado e ativa o botão
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    instaladorPWA = e;
+    
+    // Revela o botão no próprio site para o utilizador clicar
+    if (btnInstalar) {
+        btnInstalar.classList.remove('oculto');
+    }
+});
+
+// Quando o utilizador clica no botão "Instalar Aplicação" no teu site
+if (btnInstalar) {
+    btnInstalar.addEventListener('click', async () => {
+        if (!instaladorPWA) return;
+        
+        // Abre a janela oficial de instalação do telemóvel
+        instaladorPWA.prompt();
+        
+        const { outcome } = await instaladorPWA.userChoice;
+        if (outcome === 'accepted') {
+            console.log('Aplicação instalada com sucesso!');
+        }
+        
+        instaladorPWA = null;
+        btnInstalar.classList.add('oculto');
+    });
+}
+
+// Oculta o botão se a aplicação já estiver instalada/aberta
+window.addEventListener('appinstalled', () => {
+    if (btnInstalar) btnInstalar.classList.add('oculto');
+});
