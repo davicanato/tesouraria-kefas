@@ -1,45 +1,48 @@
 /* =====================================================
-   TESOURARIA KEFAS - DESIGN ULTRA-PREMIUM (VERSÃO 2.0)
-   - Correção de sombras cortadas / bordas serrilhadas
-   - Integração para logo com iluminação sutil
-   - Gradiente metálico dourado realista
+   TESOURARIA KEFAS - ESTILO PREMIUM DEFINITIVO
+   - Sem artefatos ou quadrados atrás dos botões
+   - Cards de lançamentos separados (Estilo Foto 1)
+   - Degradê Dourado de Alta Definição
    ===================================================== */
 
+/* ---------- Variáveis de Cores e Sombras ---------- */
 :root {
-    /* Degradê Dourado Metálico Realista (Liso e sem serrilhado) */
-    --dourado-gradiente: linear-gradient(135deg, #d4af37 0%, #c59b27 40%, #a37c1e 100%);
-    --dourado-gradiente-hover: linear-gradient(135deg, #e5be48 0%, #d6ac38 40%, #b48d2f 100%);
-    --dourado-gradiente-soft: linear-gradient(135deg, #fefcf7 0%, #f6f0df 100%);
+    /* Degradê Dourado Limpo e Sem Ruído */
+    --dourado-gradiente: linear-gradient(135deg, #d4af37 0%, #c59b27 50%, #a37c1e 100%);
+    --dourado-gradiente-hover: linear-gradient(135deg, #e5be48 0%, #d6ac38 50%, #b48d2f 100%);
     
-    /* Cores Douradas Finais */
+    /* Cores de Apoio */
     --dourado-principal: #c59b27;
     --dourado-escuro: #7a5c12;
-    --dourado-fundo: #fbf8f0;
+    --dourado-fundo-suave: #fbf8f0;
     --dourado-borda: rgba(197, 155, 39, 0.25);
     
-    /* Neutros de Alta Definição */
+    /* Neutros */
     --bg-pagina: #f1f3f6;
     --card-fundo: #ffffff;
     --texto-titulo: #0f172a;
     --texto-corpo: #475569;
-    --borda-fina: rgba(226, 232, 240, 0.8);
+    --borda-fina: #e2e8f0;
     
-    /* Sombras Macias de Alta Precisão (Sem corte de caixa) */
-    --sombra-pill-dourado: 0 4px 14px rgba(197, 155, 39, 0.35);
-    --sombra-card-suave: 0 10px 25px -5px rgba(15, 23, 42, 0.05);
+    /* Entradas e Saídas */
+    --verde-entrada: #10b981;
+    --vermelho-saida: #ef4444;
+
+    /* Sombra Suave (Sem sombras quadradas vazadas) */
+    --sombra-botao: 0 4px 12px rgba(197, 155, 39, 0.3);
+    --sombra-card: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-/* ---------- Reset & Renderização Anti-Serrilhado ---------- */
+/* ---------- Resets Globais ---------- */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: var(--bg-pagina);
     color: var(--texto-corpo);
     min-height: 100vh;
@@ -50,17 +53,16 @@ body {
 
 .oculto { display: none !important; }
 
-/* ---------- Container Principal ---------- */
+/* ---------- Container Principal (App) ---------- */
 .app {
     width: 100%;
     max-width: 480px;
     min-height: 100vh;
     background: var(--card-fundo);
-    padding: 36px 26px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.09);
+    padding: 32px 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    /* IMPORTANTE: Removido overflow:hidden do app para não cortar sombras de botões */
 }
 
 @media (min-width: 520px) {
@@ -72,34 +74,28 @@ body {
     }
 }
 
-/* ---------- Logo & Cabeçalho Ajustado ---------- */
+/* ---------- Logo com Imagem ---------- */
 .logo { 
     text-align: center; 
     margin-top: 10px; 
-    margin-bottom: 30px; 
+    margin-bottom: 28px; 
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
-/* Estilo para a imagem da Logo */
 .logo-img {
-    max-width: 120px;
+    max-width: 100px;
     height: auto;
     object-fit: contain;
     filter: drop-shadow(0 4px 8px rgba(197, 155, 39, 0.2));
-    transition: transform 0.3s ease;
-}
-
-.logo-img:hover {
-    transform: scale(1.03);
 }
 
 .logo h1 { 
     font-size: 24px; 
     font-weight: 800;
-    letter-spacing: 1.2px; 
+    letter-spacing: 1px; 
     text-transform: uppercase;
     background: var(--dourado-gradiente);
     -webkit-background-clip: text;
@@ -107,13 +103,11 @@ body {
     display: inline-block;
 }
 
-/* ---------- Formulários & Entradas de Texto ---------- */
+/* ---------- Formulários ---------- */
 label { 
     display: block; 
-    font-size: 12px; 
+    font-size: 13px; 
     font-weight: 700; 
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
     color: var(--texto-corpo);
     margin-bottom: 8px; 
 }
@@ -129,135 +123,67 @@ input, select, textarea {
     outline: none;
     background: #ffffff;
     font-family: inherit;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 input:focus, select:focus, textarea:focus { 
     border-color: var(--dourado-principal);
-    box-shadow: 0 0 0 4px rgba(197, 155, 39, 0.15);
+    box-shadow: 0 0 0 3px rgba(197, 155, 39, 0.15);
 }
 
-/* ---------- Botões Dourados Sem Defeito Visual ---------- */
+/* ---------- Botões Gerais ---------- */
 button {
     width: 100%;
-    padding: 15px 24px;
-    border: none; /* Removida borda rígida para eliminar o contorno feio */
+    padding: 15px;
+    border: none;
     border-radius: 12px;
     background: var(--dourado-gradiente);
     color: #ffffff;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
-    letter-spacing: 0.5px;
     cursor: pointer;
-    box-shadow: var(--sombra-pill-dourado);
-    transition: all 0.25s ease;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
+    box-shadow: var(--sombra-botao);
+    transition: transform 0.2s, background 0.2s;
+    isolation: isolate; /* Evita fundo quadrado ou artefato sob o botão */
 }
 
 button:hover { 
     background: var(--dourado-gradiente-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(197, 155, 39, 0.45);
-}
-
-button:active {
-    transform: translateY(0);
-    box-shadow: var(--sombra-pill-dourado);
+    transform: translateY(-1px);
 }
 
 button:disabled { 
     opacity: 0.6; 
-    cursor: not-allowed;
+    cursor: wait;
     transform: none;
-    box-shadow: none;
 }
 
-/* ---------- Correção dos Botões Estilo "Pill" (Navegação / Dashboard) ---------- */
-.menu {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    margin-bottom: 24px;
-    padding: 4px 2px 10px 2px; /* Espaçamento interno para a sombra não ser cortada nas pontas */
+.mensagem { 
+    margin-top: 14px; 
+    font-size: 14px; 
+    color: var(--vermelho-saida); 
+    text-align: center; 
+    min-height: 20px; 
 }
 
-.menu::-webkit-scrollbar { display: none; }
-
-/* Formato em pílula perfeito igual ao da imagem, porém corrigido e suave */
-.menu a {
-    flex: 0 0 auto;
-    padding: 10px 22px;
-    border-radius: 999px; /* Curva perfeita sem cantos pontudos */
-    background: #f1f5f9;
-    color: var(--texto-corpo);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    border: 1px solid transparent;
-    transition: all 0.25s ease;
-}
-
-.menu a:hover {
-    background: #e2e8f0;
-    color: var(--texto-titulo);
-}
-
-/* Estado ativo idêntico ao pílula dourada mas limpo e suave */
-.menu a.ativo { 
-    background: var(--dourado-gradiente); 
-    color: #ffffff; 
-    box-shadow: var(--sombra-pill-dourado);
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Brilho interno discreto na borda */
-}
-
-/* ---------- Cartão de Saldo Dourado ---------- */
-.saldo {
-    background: var(--dourado-gradiente);
-    color: #ffffff;
-    border-radius: 20px;
-    padding: 26px;
-    text-align: center;
-    margin-bottom: 20px;
-    box-shadow: var(--sombra-pill-dourado);
-}
-
-.saldo .rotulo { 
-    font-size: 12px; 
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    opacity: 0.9; 
-    font-weight: 600;
-}
-
-.saldo .valor { 
-    font-size: 34px; 
-    font-weight: 800; 
-    margin-top: 6px; 
-}
-
-/* ---------- Topo e Perfis ---------- */
+/* ---------- Topo (Usuário & Sair) ---------- */
 .topo {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
-.topo .ola { font-size: 17px; font-weight: 700; color: var(--texto-titulo); }
+.topo .ola { font-size: 18px; font-weight: 700; color: var(--texto-titulo); }
 
 .selo {
     display: inline-block;
     padding: 4px 12px;
     font-size: 11px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-radius: 999px;
-    background: var(--dourado-fundo);
+    border-radius: 20px;
+    background: var(--dourado-fundo-suave);
     color: var(--dourado-escuro);
     border: 1px solid var(--dourado-borda);
 }
@@ -272,40 +198,152 @@ button:disabled {
     border-radius: 8px;
 }
 
-.botao-sair:hover {
-    background: #e2e8f0;
-    box-shadow: none;
-    transform: none;
+/* ---------- Menu de Navegação (Dashboard, Entradas, Saídas) ---------- */
+.menu {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin-bottom: 22px;
+    padding: 2px 2px 8px 2px;
+    background: transparent !important; /* Remove qualquer quadrado de fundo do container */
 }
+
+.menu::-webkit-scrollbar { display: none; }
+
+.menu a {
+    flex: 0 0 auto;
+    padding: 10px 20px;
+    border-radius: 30px; /* Pílula arredondada */
+    background: #f1f5f9;
+    color: var(--texto-corpo);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    border: none;
+    outline: none;
+    isolation: isolate; /* CORREÇÃO: Impede renderização de fundo quadrado */
+}
+
+.menu a:hover {
+    background: #e2e8f0;
+    color: var(--texto-titulo);
+}
+
+/* Botão Ativo (Dourado Sem Quadrado Atrás) */
+.menu a.ativo { 
+    background: var(--dourado-gradiente); 
+    color: #ffffff; 
+    box-shadow: var(--sombra-botao);
+}
+
+/* ---------- Card de Saldo ---------- */
+.saldo {
+    background: var(--dourado-gradiente);
+    color: #ffffff;
+    border-radius: 18px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: var(--sombra-botao);
+}
+
+.saldo .rotulo { font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.9; }
+.saldo .valor { font-size: 34px; font-weight: 800; margin-top: 6px; }
 
 /* ---------- Cards Resumo ---------- */
-.cards { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 12px; 
-    margin-bottom: 16px; 
-}
+.periodo-box { margin-bottom: 4px; }
+.periodo-box select { margin-bottom: 8px; }
+.periodo-nome { font-size: 13px; color: #64748b; margin-bottom: 16px; text-align: center; }
 
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 .card {
     border: 1px solid var(--borda-fina);
     border-radius: 14px;
     padding: 16px;
     background: #ffffff;
-    box-shadow: var(--sombra-card-suave);
+    box-shadow: var(--sombra-card);
 }
-
 .card .rotulo { font-size: 12px; color: #64748b; font-weight: 600; }
-.card .valor { font-size: 19px; font-weight: 800; margin-top: 4px; }
+.card .valor { font-size: 18px; font-weight: 800; margin-top: 4px; }
 .card.largo { grid-column: 1 / 3; }
 
-.verde { color: #10b981; }
-.vermelho { color: #ef4444; }
+.verde { color: var(--verde-entrada); }
+.vermelho { color: var(--vermelho-saida); }
+
+.secao-titulo { font-size: 16px; font-weight: 700; color: var(--texto-titulo); margin: 24px 0 12px; }
+
+/* ---------- Gráfico ---------- */
+.grafico {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 36px;
+    height: 170px;
+    border: 1px solid var(--borda-fina);
+    border-radius: 14px;
+    padding: 16px;
+    background: #ffffff;
+    box-shadow: var(--sombra-card);
+}
+.coluna { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; width: 80px; }
+.barra { width: 100%; border-radius: 8px 8px 0 0; min-height: 4px; transition: height 0.4s; }
+.barra.entrada { background: var(--verde-entrada); }
+.barra.saida { background: var(--vermelho-saida); }
+.coluna .nome { font-size: 12px; margin-top: 8px; color: var(--texto-corpo); font-weight: 600; }
+
+/* ---------- LISTA DE LANÇAMENTOS (RESTAURADA E SEPARADA COMO NA FOTO 1) ---------- */
+.lista { 
+    border: 1px solid var(--borda-fina); 
+    border-radius: 16px; 
+    overflow: hidden; 
+    background: #ffffff;
+    box-shadow: var(--sombra-card);
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--borda-fina);
+    background: #ffffff;
+}
+
+.item:last-child { 
+    border-bottom: none; 
+}
+
+.item .data { 
+    font-size: 11px; 
+    font-weight: 700;
+    color: #94a3b8; 
+    text-transform: uppercase;
+}
+
+.item .desc { 
+    font-size: 14px; 
+    font-weight: 700; 
+    color: var(--texto-titulo);
+    margin-top: 2px; 
+}
+
+.item .cat { 
+    font-size: 12px; 
+    color: #64748b; 
+    margin-top: 2px; 
+}
+
+.item .quanto { 
+    font-size: 15px; 
+    font-weight: 800; 
+    white-space: nowrap; 
+}
+
+.vazio { padding: 20px; text-align: center; font-size: 14px; color: #94a3b8; }
+
+.atualizacao { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 20px; }
 
 /* ---------- Rodapé ---------- */
-.footer { 
-    text-align: center; 
-    margin-top: auto;
-    padding-top: 24px; 
-    font-size: 12px; 
-    color: #94a3b8; 
-}
+.footer { text-align: center; margin-top: auto; padding-top: 30px; font-size: 12px; color: #94a3b8; }
