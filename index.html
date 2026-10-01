@@ -6,11 +6,7 @@
     <title>M.A.K.E.L | Tesouraria</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: Arial, sans-serif;
@@ -21,47 +17,22 @@
             justify-content: center;
         }
 
-        .oculto {
-            display: none !important;
-        }
+        .oculto { display: none !important; }
 
         .app {
             width: 100%;
-            max-width: 430px;
+            max-width: 520px;
             min-height: 100vh;
             background: white;
             padding: 30px 22px;
         }
 
-        .logo {
-            text-align: center;
-            margin-top: 60px;
-            margin-bottom: 45px;
-        }
+        .logo { text-align: center; margin-top: 40px; margin-bottom: 35px; }
+        .logo h1 { font-size: 28px; letter-spacing: 1px; }
 
-        .logo h1 {
-            font-size: 28px;
-            letter-spacing: 1px;
-        }
+        label { display: block; font-size: 14px; font-weight: bold; margin-bottom: 8px; }
 
-        .logo p {
-            margin-top: 8px;
-            color: #777;
-            font-size: 14px;
-        }
-
-        .login-box {
-            width: 100%;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        input {
+        input, select {
             width: 100%;
             padding: 15px;
             border: 1px solid #ddd;
@@ -69,11 +40,9 @@
             font-size: 16px;
             margin-bottom: 18px;
             outline: none;
+            background: white;
         }
-
-        input:focus {
-            border-color: #b08d3c;
-        }
+        input:focus, select:focus { border-color: #b08d3c; }
 
         button {
             width: 100%;
@@ -86,63 +55,104 @@
             font-weight: bold;
             cursor: pointer;
         }
+        button:hover { opacity: 0.9; }
+        button:disabled { opacity: 0.6; cursor: wait; }
 
-        button:hover {
-            opacity: 0.9;
+        .mensagem { margin-top: 14px; font-size: 14px; color: #c0392b; text-align: center; min-height: 20px; }
+
+        /* ---------- Dashboard ---------- */
+        .topo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: wait;
-        }
-
-        button.secundario {
-            background: #eeeeee;
-            color: #444;
-            margin-top: 30px;
-        }
-
-        .mensagem {
-            margin-top: 14px;
-            font-size: 14px;
-            color: #c0392b;
-            text-align: center;
-            min-height: 20px;
-        }
-
-        .boas-vindas {
-            text-align: center;
-        }
-
-        .boas-vindas .ola {
-            font-size: 22px;
-            font-weight: bold;
-        }
-
+        .topo .ola { font-size: 18px; font-weight: bold; }
         .selo {
             display: inline-block;
-            margin-top: 12px;
-            padding: 6px 14px;
-            font-size: 13px;
+            margin-top: 4px;
+            padding: 4px 12px;
+            font-size: 12px;
             font-weight: bold;
             border-radius: 20px;
             background: #f6efdc;
             color: #8a6c1f;
         }
-
-        .aviso {
-            margin-top: 18px;
+        .botao-sair {
+            width: auto;
+            padding: 10px 18px;
             font-size: 14px;
-            color: #777;
-            line-height: 1.5;
+            background: #eeeeee;
+            color: #444;
         }
 
-        .footer {
+        .saldo {
+            background: #b08d3c;
+            color: white;
+            border-radius: 14px;
+            padding: 22px;
             text-align: center;
-            margin-top: 50px;
-            font-size: 12px;
-            color: #999;
+            margin-bottom: 16px;
         }
+        .saldo .rotulo { font-size: 14px; opacity: 0.9; }
+        .saldo .valor { font-size: 32px; font-weight: bold; margin-top: 6px; }
+
+        .periodo-box { margin-bottom: 4px; }
+        .periodo-box select { margin-bottom: 8px; }
+        .periodo-nome { font-size: 13px; color: #777; margin-bottom: 14px; text-align: center; }
+
+        .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .card {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 14px;
+            background: #fafafa;
+        }
+        .card .rotulo { font-size: 13px; color: #777; }
+        .card .valor { font-size: 18px; font-weight: bold; margin-top: 6px; }
+        .card.largo { grid-column: 1 / 3; }
+        .verde { color: #1e8449; }
+        .vermelho { color: #c0392b; }
+
+        .secao-titulo { font-size: 16px; font-weight: bold; margin: 22px 0 12px; }
+
+        .grafico {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 40px;
+            height: 170px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 16px 16px 10px;
+            background: #fafafa;
+        }
+        .coluna { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; width: 90px; }
+        .barra { width: 100%; border-radius: 8px 8px 0 0; min-height: 3px; transition: height 0.4s; }
+        .barra.entrada { background: #27ae60; }
+        .barra.saida { background: #c0392b; }
+        .coluna .nome { font-size: 12px; margin-top: 6px; color: #555; }
+
+        .lista { border: 1px solid #eee; border-radius: 12px; overflow: hidden; }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .item:last-child { border-bottom: none; }
+        .item .data { font-size: 12px; color: #888; }
+        .item .desc { font-size: 14px; font-weight: bold; margin-top: 2px; }
+        .item .cat { font-size: 12px; color: #777; margin-top: 2px; }
+        .item .quanto { font-size: 15px; font-weight: bold; white-space: nowrap; }
+        .vazio { padding: 18px; text-align: center; font-size: 14px; color: #888; }
+
+        .atualizacao { text-align: center; font-size: 12px; color: #888; margin-top: 18px; }
+
+        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #999; }
     </style>
 </head>
 
@@ -157,43 +167,79 @@
         </section>
 
         <!-- TELA DE LOGIN -->
-        <section id="tela-login" class="login-box oculto">
+        <section id="tela-login" class="oculto">
             <form id="form-login">
                 <label for="usuario">Usuário</label>
-                <input
-                    type="text"
-                    id="usuario"
-                    placeholder="Digite seu usuário"
-                    autocomplete="username"
-                    autocapitalize="none"
-                    required
-                >
+                <input type="text" id="usuario" placeholder="Digite seu usuário"
+                       autocomplete="username" autocapitalize="none" required>
 
                 <label for="senha">Senha</label>
-                <input
-                    type="password"
-                    id="senha"
-                    placeholder="Digite sua senha"
-                    autocomplete="current-password"
-                    required
-                >
+                <input type="password" id="senha" placeholder="Digite sua senha"
+                       autocomplete="current-password" required>
 
-                <button id="botao-entrar" type="submit">
-                    ENTRAR
-                </button>
-
+                <button id="botao-entrar" type="submit">ENTRAR</button>
                 <div id="mensagem" class="mensagem"></div>
             </form>
         </section>
 
-        <!-- TELA APÓS O LOGIN (provisória) -->
-        <section id="tela-app" class="boas-vindas oculto">
-            <div id="ola" class="ola"></div>
-            <div id="selo" class="selo"></div>
-            <p class="aviso">Login funcionando. O dashboard será criado na próxima etapa.</p>
-            <button id="botao-sair" class="secundario" type="button">
-                SAIR
-            </button>
+        <!-- DASHBOARD -->
+        <section id="tela-app" class="oculto">
+
+            <div class="topo">
+                <div>
+                    <div id="ola" class="ola"></div>
+                    <div id="selo" class="selo"></div>
+                </div>
+                <button id="botao-sair" class="botao-sair" type="button">SAIR</button>
+            </div>
+
+            <div class="saldo">
+                <div class="rotulo">Saldo atual</div>
+                <div id="saldo-valor" class="valor">R$ 0,00</div>
+            </div>
+
+            <div class="periodo-box">
+                <select id="periodo">
+                    <option value="mes">Este mês</option>
+                    <option value="mes_anterior">Mês anterior</option>
+                    <option value="ano">Este ano</option>
+                    <option value="tudo">Todo o período</option>
+                </select>
+                <div id="periodo-nome" class="periodo-nome"></div>
+            </div>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="rotulo">Entradas</div>
+                    <div id="total-entradas" class="valor verde">R$ 0,00</div>
+                </div>
+                <div class="card">
+                    <div class="rotulo">Saídas</div>
+                    <div id="total-saidas" class="valor vermelho">R$ 0,00</div>
+                </div>
+                <div class="card largo">
+                    <div class="rotulo">Resultado do período</div>
+                    <div id="total-resultado" class="valor">R$ 0,00</div>
+                </div>
+            </div>
+
+            <div class="secao-titulo">Entradas x Saídas</div>
+            <div class="grafico">
+                <div class="coluna">
+                    <div id="barra-entradas" class="barra entrada" style="height:3px"></div>
+                    <div class="nome">Entradas</div>
+                </div>
+                <div class="coluna">
+                    <div id="barra-saidas" class="barra saida" style="height:3px"></div>
+                    <div class="nome">Saídas</div>
+                </div>
+            </div>
+
+            <div class="secao-titulo">Lançamentos recentes</div>
+            <div id="lista" class="lista"></div>
+
+            <div id="atualizacao" class="atualizacao"></div>
+            <div id="erro-dados" class="mensagem"></div>
         </section>
 
         <div class="footer">
@@ -209,7 +255,6 @@
         // ---- Conexão com o Supabase (a chave publishable é pública) ----
         const SUPABASE_URL = 'https://hzlmiojvtlieyybpqgsh.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_goagYxbDY883ytUGkvLoSA_eAiVX-6P';
-
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const telaLogin = document.getElementById('tela-login');
@@ -217,9 +262,52 @@
         const formLogin = document.getElementById('form-login');
         const botaoEntrar = document.getElementById('botao-entrar');
         const mensagem = document.getElementById('mensagem');
+        const seletorPeriodo = document.getElementById('periodo');
 
         document.getElementById('ano-atual').textContent = new Date().getFullYear();
 
+        let lancamentos = [];
+
+        // ---------- Funções auxiliares ----------
+        function pad(n) { return String(n).padStart(2, '0'); }
+
+        function iso(d) {
+            return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        }
+
+        function brl(valor) {
+            return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function intervalo(periodo) {
+            const h = new Date();
+            const y = h.getFullYear();
+            const m = h.getMonth();
+            if (periodo === 'mes') return [iso(new Date(y, m, 1)), iso(new Date(y, m + 1, 0))];
+            if (periodo === 'mes_anterior') return [iso(new Date(y, m - 1, 1)), iso(new Date(y, m, 0))];
+            if (periodo === 'ano') return [y + '-01-01', y + '-12-31'];
+            return ['0000-01-01', '9999-12-31'];
+        }
+
+        function nomeDoPeriodo(periodo) {
+            const h = new Date();
+            const y = h.getFullYear();
+            const m = h.getMonth();
+            const nomeMes = (data) => {
+                const t = data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                return t.charAt(0).toUpperCase() + t.slice(1);
+            };
+            if (periodo === 'mes') return nomeMes(new Date(y, m, 1));
+            if (periodo === 'mes_anterior') return nomeMes(new Date(y, m - 1, 1));
+            if (periodo === 'ano') return 'Ano de ' + y;
+            return 'Desde o primeiro lançamento';
+        }
+
+        function dataBR(dataIso) {
+            return dataIso.slice(8, 10) + '/' + dataIso.slice(5, 7);
+        }
+
+        // ---------- Telas ----------
         function mostrarLogin() {
             telaApp.classList.add('oculto');
             telaLogin.classList.remove('oculto');
@@ -244,8 +332,120 @@
             document.getElementById('ola').textContent = 'Olá, ' + data.nome;
             document.getElementById('selo').textContent =
                 data.role === 'admin' ? 'Administrador' : 'Visualização';
+
+            carregarDados();
         }
 
+        // ---------- Dados do dashboard ----------
+        async function carregarDados() {
+            document.getElementById('erro-dados').textContent = '';
+
+            const { data, error } = await db
+                .from('transactions')
+                .select('id, tipo, valor, data, descricao, pessoa, updated_at, categories(nome)')
+                .eq('excluido', false)
+                .order('data', { ascending: false })
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                document.getElementById('erro-dados').textContent =
+                    'Não foi possível carregar os lançamentos: ' + error.message;
+                return;
+            }
+
+            lancamentos = data;
+            desenhar();
+        }
+
+        function desenhar() {
+            // Saldo atual: soma de tudo
+            let saldo = 0;
+            lancamentos.forEach((l) => {
+                saldo += l.tipo === 'entrada' ? Number(l.valor) : -Number(l.valor);
+            });
+            document.getElementById('saldo-valor').textContent = brl(saldo);
+
+            // Totais do período escolhido
+            const periodo = seletorPeriodo.value;
+            const [inicio, fim] = intervalo(periodo);
+            let entradas = 0;
+            let saidas = 0;
+            lancamentos.forEach((l) => {
+                if (l.data >= inicio && l.data <= fim) {
+                    if (l.tipo === 'entrada') entradas += Number(l.valor);
+                    else saidas += Number(l.valor);
+                }
+            });
+            const resultado = entradas - saidas;
+
+            document.getElementById('periodo-nome').textContent = nomeDoPeriodo(periodo);
+            document.getElementById('total-entradas').textContent = brl(entradas);
+            document.getElementById('total-saidas').textContent = brl(saidas);
+
+            const elResultado = document.getElementById('total-resultado');
+            elResultado.textContent = brl(resultado);
+            elResultado.className = 'valor ' + (resultado >= 0 ? 'verde' : 'vermelho');
+
+            // Gráfico
+            const maior = Math.max(entradas, saidas);
+            const altura = (v) => (maior === 0 ? 3 : Math.max(3, Math.round((v / maior) * 110)));
+            document.getElementById('barra-entradas').style.height = altura(entradas) + 'px';
+            document.getElementById('barra-saidas').style.height = altura(saidas) + 'px';
+
+            // Lançamentos recentes (10 mais novos)
+            const lista = document.getElementById('lista');
+            lista.innerHTML = '';
+            if (lancamentos.length === 0) {
+                const vazio = document.createElement('div');
+                vazio.className = 'vazio';
+                vazio.textContent = 'Nenhum lançamento ainda.';
+                lista.appendChild(vazio);
+            }
+            lancamentos.slice(0, 10).forEach((l) => {
+                const item = document.createElement('div');
+                item.className = 'item';
+
+                const esquerda = document.createElement('div');
+                const data = document.createElement('div');
+                data.className = 'data';
+                data.textContent = dataBR(l.data) + (l.pessoa ? ' • ' + l.pessoa : '');
+                const desc = document.createElement('div');
+                desc.className = 'desc';
+                desc.textContent = l.descricao || '(sem descrição)';
+                const cat = document.createElement('div');
+                cat.className = 'cat';
+                cat.textContent = l.categories ? l.categories.nome : '';
+                esquerda.appendChild(data);
+                esquerda.appendChild(desc);
+                esquerda.appendChild(cat);
+
+                const quanto = document.createElement('div');
+                const positivo = l.tipo === 'entrada';
+                quanto.className = 'quanto ' + (positivo ? 'verde' : 'vermelho');
+                quanto.textContent = (positivo ? '+ ' : '- ') + brl(l.valor);
+
+                item.appendChild(esquerda);
+                item.appendChild(quanto);
+                lista.appendChild(item);
+            });
+
+            // Última atualização
+            const el = document.getElementById('atualizacao');
+            if (lancamentos.length === 0) {
+                el.textContent = '';
+            } else {
+                let maisRecente = lancamentos[0].updated_at;
+                lancamentos.forEach((l) => { if (l.updated_at > maisRecente) maisRecente = l.updated_at; });
+                const d = new Date(maisRecente);
+                el.textContent = 'Última atualização: ' +
+                    pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() +
+                    ' às ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+            }
+        }
+
+        seletorPeriodo.addEventListener('change', desenhar);
+
+        // ---------- Login ----------
         formLogin.addEventListener('submit', async (evento) => {
             evento.preventDefault();
             mensagem.textContent = '';
@@ -260,10 +460,7 @@
                 email = email.toLowerCase() + '@kefas.com';
             }
 
-            const { data, error } = await db.auth.signInWithPassword({
-                email: email,
-                password: senha
-            });
+            const { data, error } = await db.auth.signInWithPassword({ email: email, password: senha });
 
             botaoEntrar.disabled = false;
             botaoEntrar.textContent = 'ENTRAR';
@@ -279,6 +476,7 @@
 
         document.getElementById('botao-sair').addEventListener('click', async () => {
             await db.auth.signOut();
+            lancamentos = [];
             mostrarLogin();
         });
 
