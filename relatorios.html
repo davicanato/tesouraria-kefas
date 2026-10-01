@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios | M.A.K.E.L Tesouraria</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/icon-192.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta name="theme-color" content="#060200">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Tesouraria Kefas">
+    <style>
+        .bloco { border: 1px solid #eee; border-radius: 12px; padding: 14px; background: #fafafa; }
+        .rb { margin-bottom: 14px; }
+        .rb:last-child { margin-bottom: 0; }
+        .rb-topo { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; margin-bottom: 4px; }
+        .rb-trilho { background: #eeeeee; border-radius: 6px; height: 10px; overflow: hidden; margin-bottom: 3px; }
+        .rb-barra { height: 100%; border-radius: 6px; min-width: 2px; }
+    </style>
+</head>
+<body>
+    <main class="app">
+
+        <section class="logo"><h1>Tesouraria | M.A.K.E.L</h1></section>
+
+        <div class="topo">
+            <div>
+                <div id="ola" class="ola"></div>
+                <div id="selo" class="selo"></div>
+            </div>
+            <button id="botao-sair" class="botao-sair" type="button">SAIR</button>
+        </div>
+        <nav id="menu" class="menu"></nav>
+
+        <label for="modo">Relatório</label>
+        <select id="modo">
+            <option value="mensal">Mensal</option>
+            <option value="anual">Anual</option>
+            <option value="personalizado">Período personalizado</option>
+        </select>
+
+        <div id="box-mes">
+            <label for="mes">Mês</label>
+            <input type="month" id="mes">
+        </div>
+        <div id="box-ano" class="oculto">
+            <label for="ano">Ano</label>
+            <select id="ano"></select>
+        </div>
+        <div id="box-datas" class="oculto" style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
+            <div>
+                <label for="de">De</label>
+                <input type="date" id="de">
+            </div>
+            <div>
+                <label for="ate">Até</label>
+                <input type="date" id="ate">
+            </div>
+        </div>
+
+        <div id="titulo-periodo" class="secao-titulo" style="margin-top:4px"></div>
+
+        <div class="cards">
+            <div class="card">
+                <div class="rotulo">Total de entradas</div>
+                <div id="total-entradas" class="valor verde">R$ 0,00</div>
+            </div>
+            <div class="card">
+                <div class="rotulo">Total de saídas</div>
+                <div id="total-saidas" class="valor vermelho">R$ 0,00</div>
+            </div>
+            <div class="card">
+                <div class="rotulo">Resultado</div>
+                <div id="total-resultado" class="valor">R$ 0,00</div>
+            </div>
+            <div class="card">
+                <div class="rotulo">Saldo acumulado</div>
+                <div id="saldo-acumulado" class="valor">R$ 0,00</div>
+            </div>
+        </div>
+        <div class="periodo-nome" style="margin-bottom:0">Saldo acumulado = tudo o que entrou menos tudo o que saiu, desde o início até o fim do período.</div>
+
+        <div class="secao-titulo">Entradas x Saídas</div>
+        <div class="grafico">
+            <div class="coluna">
+                <div id="barra-entradas" class="barra entrada" style="height:3px"></div>
+                <div class="nome">Entradas</div>
+            </div>
+            <div class="coluna">
+                <div id="barra-saidas" class="barra saida" style="height:3px"></div>
+                <div class="nome">Saídas</div>
+            </div>
+        </div>
+
+        <div class="secao-titulo">Entradas por categoria</div>
+        <div id="cat-entradas" class="bloco"></div>
+
+        <div class="secao-titulo">Saídas por categoria</div>
+        <div id="cat-saidas" class="bloco"></div>
+
+        <div class="secao-titulo">Evolução mensal</div>
+        <div class="periodo-nome" style="text-align:left;margin-bottom:8px">
+            <span class="verde">■ Entradas</span> &nbsp; <span class="vermelho">■ Saídas</span>
+        </div>
+        <div id="evolucao" class="bloco"></div>
+
+        <div id="erro" class="mensagem"></div>
+
+        <div class="footer">
+            Aplicativo Oficial | Feito Por @davicanato1 <br>
+            Ministério Apostólico Kefas Lavradas ©<span id="ano-atual">2026</span> <br>
+            <center> CNPJ | 56.797.417/0001-81 </center>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+    <script>
+    (async () => {
+        const sessao = await iniciarPagina('relatorios.html');
+        if (!sessao) return;
+
+        const el = (id) => document.getElementById(id);
+        const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        let pedido = 0;
+
+        // ---------- Auxiliares ----------
+        function dataCompleta(d) { return d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(0, 4); }
+        function ultimoDia(y, m) { return iso(new Date(y, m, 0)); }   // m de 1 a 12
+        function chaveMes(y, m) { return y + '-' + pad(m); }
+        function rotuloMes(y, m) { return MESES[m - 1] + '/' + String(y).slice(2); }
+
+        function listaDeMeses(y1, m1, y2, m2) {
+            const lista = [];
+            let y = y1, m = m1;
+            while (y < y2 || (y === y2 && m <= m2)) {
+                lista.push({ y: y, m: m, chave: chaveMes(y, m), rotulo: rotuloMes(y, m) });
+                m++;
+                if (m > 12) { m = 1; y++; }
+            }
+            return lista;
+        }
+
+        // ---------- Início: preencher mês e ano ----------
+        const hoje = new Date();
+        el('mes').value = chaveMes(hoje.getFullYear(), hoje.getMonth() + 1);
+        for (let a = hoje.getFullYear(); a >= hoje.getFullYear() - 5; a--) {
+            const o = document.createElement('option');
+            o.value = a;
+            o.textContent = a;
+            el('ano').appendChild(o);
+        }
+
+        // ---------- Define o período escolhido ----------
+        function periodoEscolhido() {
+            const modo = el('modo').value;
+
+            if (modo === 'mensal') {
+                const [y, m] = (el('mes').value || chaveMes(hoje.getFullYear(), hoje.getMonth() + 1)).split('-').map(Number);
+                const nome = new Date(y, m - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                return {
+                    titulo: nome.charAt(0).toUpperCase() + nome.slice(1),
+                    inicio: y + '-' + pad(m) + '-01',
+                    fim: ultimoDia(y, m),
+                    meses: listaDeMeses(y, 1, y, 12),
+                    evoIni: y + '-01-01',
+                    evoFim: y + '-12-31'
+                };
+            }
+
+            if (modo === 'anual') {
+                const y = Number(el('ano').value);
+                return {
+                    titulo: 'Ano de ' + y,
+                    inicio: y + '-01-01',
+                    fim: y + '-12-31',
+                    meses: listaDeMeses(y, 1, y, 12),
+                    evoIni: y + '-01-01',
+                    evoFim: y + '-12-31'
+                };
+            }
+
+            // personalizado
+            const de = el('de').value;
+            const ate = el('ate').value;
+            if (!de || !ate) return { erro: 'Escolha as duas datas (De e Até).' };
+            if (de > ate) return { erro: 'A data inicial não pode ser depois da final.' };
+
+            const [y1, m1] = de.split('-').map(Number);
+            const [y2, m2] = ate.split('-').map(Number);
+            let meses = listaDeMeses(y1, m1, y2, m2);
+            let evoIni = de;
+            if (meses.length > 24) {
+                meses = meses.slice(-24);
+                evoIni = meses[0].chave + '-01';
+            }
+            return {
+                titulo: dataCompleta(de) + ' até ' + dataCompleta(ate),
+                inicio: de,
+                fim: ate,
+                meses: meses,
+                evoIni: evoIni,
+                evoFim: ate
+            };
+        }
+
+        // ---------- Busca todos os lançamentos até a data (de mil em mil) ----------
+        async function buscarTudo(ate) {
+            let tudo = [];
+            let de = 0;
+            while (true) {
+                const { data, error } = await db
+                    .from('transactions')
+                    .select('tipo, valor, data, categories(nome)')
+                    .eq('excluido', false)
+                    .lte('data', ate)
+                    .order('data', { ascending: true })
+                    .order('id', { ascending: true })
+                    .range(de, de + 999);
+                if (error) throw error;
+                tudo = tudo.concat(data);
+                if (data.length < 1000) break;
+                de += 1000;
+            }
+            return tudo;
+        }
+
+        // ---------- Desenhos ----------
+        function barraLinha(container, rotulo, texto, percentual, cor) {
+            const linha = document.createElement('div');
+            linha.className = 'rb';
+            const topo = document.createElement('div');
+            topo.className = 'rb-topo';
+            const a = document.createElement('span');
+            a.textContent = rotulo;
+            const b = document.createElement('span');
+            b.textContent = texto;
+            topo.appendChild(a);
+            topo.appendChild(b);
+            const trilho = document.createElement('div');
+            trilho.className = 'rb-trilho';
+            const barra = document.createElement('div');
+            barra.className = 'rb-barra';
+            barra.style.width = Math.max(0, Math.min(100, percentual)) + '%';
+            barra.style.background = cor;
+            trilho.appendChild(barra);
+            linha.appendChild(topo);
+            linha.appendChild(trilho);
+            container.appendChild(linha);
+            return linha;
+        }
+
+        function desenharCategorias(container, mapa, cor) {
+            container.innerHTML = '';
+            const itens = Object.keys(mapa).map((n) => [n, mapa[n]]).sort((x, y) => y[1] - x[1]);
+            if (itens.length === 0) {
+                container.innerHTML = '<div class="vazio">Sem lançamentos no período.</div>';
+                return;
+            }
+            const total = itens.reduce((s, i) => s + i[1], 0);
+            const maior = itens[0][1];
+            itens.forEach(([nome, valor]) => {
+                const pct = total > 0 ? Math.round((valor / total) * 100) : 0;
+                barraLinha(container, nome, brl(valor) + ' (' + pct + '%)', (valor / maior) * 100, cor);
+            });
+        }
+
+        function desenharEvolucao(container, meses, porMes) {
+            container.innerHTML = '';
+            let maior = 0;
+            meses.forEach((m) => {
+                const v = porMes[m.chave] || { e: 0, s: 0 };
+                maior = Math.max(maior, v.e, v.s);
+            });
+            meses.forEach((m) => {
+                const v = porMes[m.chave] || { e: 0, s: 0 };
+                const res = v.e - v.s;
+                const linha = barraLinha(container, m.rotulo, 'Resultado: ' + brl(res),
+                    maior > 0 ? (v.e / maior) * 100 : 0, '#27ae60');
+                linha.querySelector('.rb-topo span:last-child').className = res >= 0 ? 'verde' : 'vermelho';
+                const trilho2 = document.createElement('div');
+                trilho2.className = 'rb-trilho';
+                const barra2 = document.createElement('div');
+                barra2.className = 'rb-barra';
+                barra2.style.width = (maior > 0 ? (v.s / maior) * 100 : 0) + '%';
+                barra2.style.background = '#c0392b';
+                trilho2.appendChild(barra2);
+                linha.appendChild(trilho2);
+            });
+        }
+
+        // ---------- Montar o relatório ----------
+        async function carregar() {
+            const meu = ++pedido;
+            el('erro').textContent = '';
+
+            const modo = el('modo').value;
+            el('box-mes').classList.toggle('oculto', modo !== 'mensal');
+            el('box-ano').classList.toggle('oculto', modo !== 'anual');
+            el('box-datas').classList.toggle('oculto', modo !== 'personalizado');
+
+            const p = periodoEscolhido();
+            if (p.erro) {
+                el('erro').textContent = p.erro;
+                return;
+            }
+            el('titulo-periodo').textContent = p.titulo;
+
+            let dados;
+            try {
+                dados = await buscarTudo(p.fim > p.evoFim ? p.fim : p.evoFim);
+            } catch (e) {
+                el('erro').textContent = 'Não foi possível carregar: ' + e.message;
+                return;
+            }
+            if (meu !== pedido) return;
+
+            let saldo = 0;
+            let entradas = 0;
+            let saidas = 0;
+            const catEntradas = {};
+            const catSaidas = {};
+            const porMes = {};
+
+            dados.forEach((l) => {
+                const v = Number(l.valor);
+                const ehEntrada = l.tipo === 'entrada';
+
+                if (l.data <= p.fim) saldo += ehEntrada ? v : -v;
+
+                if (l.data >= p.inicio && l.data <= p.fim) {
+                    const nome = l.categories ? l.categories.nome : 'Sem categoria';
+                    if (ehEntrada) { entradas += v; catEntradas[nome] = (catEntradas[nome] || 0) + v; }
+                    else { saidas += v; catSaidas[nome] = (catSaidas[nome] || 0) + v; }
+                }
+
+                if (l.data >= p.evoIni && l.data <= p.evoFim) {
+                    const chave = l.data.slice(0, 7);
+                    if (!porMes[chave]) porMes[chave] = { e: 0, s: 0 };
+                    if (ehEntrada) porMes[chave].e += v; else porMes[chave].s += v;
+                }
+            });
+
+            el('total-entradas').textContent = brl(entradas);
+            el('total-saidas').textContent = brl(saidas);
+            const res = entradas - saidas;
+            el('total-resultado').textContent = brl(res);
+            el('total-resultado').className = 'valor ' + (res >= 0 ? 'verde' : 'vermelho');
+            el('saldo-acumulado').textContent = brl(saldo);
+            el('saldo-acumulado').className = 'valor ' + (saldo >= 0 ? 'verde' : 'vermelho');
+
+            const maior = Math.max(entradas, saidas);
+            const altura = (v) => (maior === 0 ? 3 : Math.max(3, Math.round((v / maior) * 110)));
+            el('barra-entradas').style.height = altura(entradas) + 'px';
+            el('barra-saidas').style.height = altura(saidas) + 'px';
+
+            desenharCategorias(el('cat-entradas'), catEntradas, '#27ae60');
+            desenharCategorias(el('cat-saidas'), catSaidas, '#c0392b');
+            desenharEvolucao(el('evolucao'), p.meses, porMes);
+        }
+
+        ['modo', 'mes', 'ano', 'de', 'ate'].forEach((id) => el(id).addEventListener('change', carregar));
+        carregar();
+    })();
+    </script>
+</body>
+</html>
