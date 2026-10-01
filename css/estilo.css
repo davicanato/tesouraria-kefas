@@ -1,6 +1,7 @@
 /* =====================================================
    TESOURARIA KEFAS - ESTILO PREMIUM DEFINITIVO
-   - Menu (Dashboard, Entradas, Saídas) 100% Plano (Zero Sombra/Brilho)
+   - Menu em grade de 3 colunas (3 em cima, 3 embaixo)
+   - Menu 100% Plano (Zero Sombra/Brilho)
    - Lançamentos em cards separados estilo executivo
    - Degradê Dourado Metálico Limpo
    ===================================================== */
@@ -191,37 +192,41 @@ button:disabled {
 }
 
 /* =====================================================
-   MENU DE NAVEGAÇÃO (DASHBOARD, ENTRADAS, SAÍDAS)
+   MENU DE NAVEGAÇÃO (GRADE DE 3 COLUNAS)
    --> SEM BRILHO, SEM SOMBRA, SEM MANCHA NO FUNDO <--
    ===================================================== */
 .menu {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    overflow-x: auto;
     margin-bottom: 22px;
     padding: 0;
     background: transparent !important;
 }
 
-.menu::-webkit-scrollbar { display: none; }
-
 .menu a {
-    flex: 0 0 auto;
-    padding: 10px 22px;
+    padding: 11px 4px;
     border-radius: 50px;
     background: #f1f5f9;
     color: var(--texto-corpo);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
     transition: background 0.2s, color 0.2s;
     border: none;
     outline: none;
-    
-    /* REMOVIDO TOTALMENTE BRILHO / SOMBRA */
+
+    /* SEM BRILHO / SEM SOMBRA */
     box-shadow: none !important;
     filter: none !important;
     -webkit-filter: none !important;
+}
+
+/* Celulares pequenos: letra um pouco menor para caber "Configurações" */
+@media (max-width: 380px) {
+    .menu a { font-size: 12px; padding: 11px 2px; }
 }
 
 .menu a:hover {
