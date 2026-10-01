@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico | M.A.K.E.L Tesouraria</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/icon-192.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta name="theme-color" content="#060200">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Tesouraria Kefas">
+</head>
+<body>
+    <main class="app">
+
+        <section class="logo"><h1>Tesouraria | M.A.K.E.L</h1></section>
+
+        <div class="topo">
+            <div>
+                <div id="ola" class="ola"></div>
+                <div id="selo" class="selo"></div>
+            </div>
+            <button id="botao-sair" class="botao-sair" type="button">SAIR</button>
+        </div>
+        <nav id="menu" class="menu"></nav>
+
+        <div class="secao-titulo" style="margin-top:0">Filtros</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
+            <div>
+                <label for="periodo">Período</label>
+                <select id="periodo">
+                    <option value="hoje">Hoje</option>
+                    <option value="mes" selected>Este mês</option>
+                    <option value="mes_anterior">Mês anterior</option>
+                    <option value="ano">Este ano</option>
+                    <option value="ano_anterior">Ano anterior</option>
+                    <option value="tudo">Todo o período</option>
+                    <option value="personalizado">Personalizado</option>
+                </select>
+            </div>
+            <div>
+                <label for="tipo">Tipo</label>
+                <select id="tipo">
+                    <option value="">Todos</option>
+                    <option value="entrada">Entradas</option>
+                    <option value="saida">Saídas</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="linha-datas" class="oculto" style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
+            <div>
+                <label for="de">De</label>
+                <input type="date" id="de">
+            </div>
+            <div>
+                <label for="ate">Até</label>
+                <input type="date" id="ate">
+            </div>
+        </div>
+
+        <label for="categoria">Categoria</label>
+        <select id="categoria"></select>
+
+        <label for="nome">Nome/pessoa</label>
+        <input type="text" id="nome" placeholder="Ex.: Davi">
+
+        <label for="busca">Pesquisar na descrição</label>
+        <input type="text" id="busca" placeholder="Ex.: energia">
+
+        <button id="botao-limpar" type="button"
+                style="background:#eeeeee;color:#444;margin-bottom:6px">LIMPAR FILTROS</button>
+
+        <div id="periodo-nome" class="periodo-nome" style="margin-top:14px"></div>
+
+        <div class="cards">
+            <div class="card">
+                <div class="rotulo">Entradas</div>
+                <div id="total-entradas" class="valor verde">R$ 0,00</div>
+            </div>
+            <div class="card">
+                <div class="rotulo">Saídas</div>
+                <div id="total-saidas" class="valor vermelho">R$ 0,00</div>
+            </div>
+            <div class="card largo">
+                <div class="rotulo">Resultado</div>
+                <div id="total-resultado" class="valor">R$ 0,00</div>
+            </div>
+        </div>
+
+        <div id="quantidade" class="secao-titulo">Lançamentos</div>
+        <div id="lista" class="lista"></div>
+        <div id="aviso" class="atualizacao"></div>
+        <div id="erro" class="mensagem"></div>
+
+        <div class="footer">
+            Aplicativo Oficial | Feito Por @davicanato1 <br>
+            Ministério Apostólico Kefas Lavradas ©<span id="ano-atual">2026</span> <br>
+            <center> CNPJ | 56.797.417/0001-81 </center>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+    <script>
+    (async () => {
+        const sessao = await iniciarPagina('historico.html');
+        if (!sessao) return;
+
+        const el = (id) => document.getElementById(id);
+        const FORMAS = { dinheiro: 'Dinheiro', pix: 'PIX', transferencia: 'Transferência', outro: 'Outro' };
+        const LIMITE = 1000;
+        let categorias = [];
+        let pedido = 0;
+        let temporizador;
+
+        function dataCompleta(d) {
+            return d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(0, 4);
+        }
+
+        function faixa(p) {
+            const h = new Date();
+            const y = h.getFullYear();
+            const m = h.getMonth();
+            if (p === 'hoje') { const t = iso(h); return [t, t]; }
+            if (p === 'mes') return [iso(new Date(y, m, 1)), iso(new Date(y, m + 1, 0))];
+            if (p === 'mes_anterior') return [iso(new Date(y, m - 1, 1)), iso(new Date(y, m, 0))];
+            if (p === 'ano') return [y + '-01-01', y + '-12-31'];
+            if (p === 'ano_anterior') return [(y - 1) + '-01-01', (y - 1) + '-12-31'];
+            if (p === 'personalizado') return [el('de').value || '0000-01-01', el('ate').value || '9999-12-31'];
+            return ['0000-01-01', '9999-12-31'];
+        }
+
+        function limparTexto(t) {
+            return t.replace(/[%,()]/g, ' ').trim();
+        }
+
+        // ---------- Categorias (entradas e saídas, inclusive as desativadas) ----------
+        const { data: cats, error: erroCats } = await db
+            .from('categories').select('id, tipo, nome, ativa').order('nome');
+        if (erroCats) {
+            el('erro').textContent = 'Erro ao carregar categorias: ' + erroCats.message;
+            return;
+        }
+        categorias = cats;
+
+        const selCat = el('categoria');
+        function montarCategorias() {
+            selCat.innerHTML = '<option value="">Todas as categorias</option>';
+            [['entrada', 'Entradas'], ['saida', 'Saídas']].forEach(([tipo, titulo]) => {
+                const grupo = document.createElement('optgroup');
+                grupo.label = titulo;
+                categorias.filter((c) => c.tipo === tipo).forEach((c) => {
+                    const o = document.createElement('option');
+                    o.value = c.id;
+                    o.textContent = c.nome + (c.ativa ? '' : ' (desativada)');
+                    grupo.appendChild(o);
+                });
+                selCat.appendChild(grupo);
+            });
+        }
+        montarCategorias();
+
+        // ---------- Busca ----------
+        async function buscar() {
+            const meu = ++pedido;
+            el('erro').textContent = '';
+
+            const periodo = el('periodo').value;
+            el('linha-datas').classList.toggle('oculto', periodo !== 'personalizado');
+            const [inicio, fim] = faixa(periodo);
+
+            if (periodo === 'tudo') el('periodo-nome').textContent = 'Todo o período';
+            else if (periodo === 'personalizado')
+                el('periodo-nome').textContent =
+                    (el('de').value ? dataCompleta(el('de').value) : 'início') + ' até ' +
+                    (el('ate').value ? dataCompleta(el('ate').value) : 'hoje');
+            else el('periodo-nome').textContent = nomeDoPeriodo(periodo === 'ano_anterior' || periodo === 'hoje' ? 'tudo' : periodo);
+            if (periodo === 'hoje') el('periodo-nome').textContent = 'Hoje, ' + dataCompleta(iso(new Date()));
+            if (periodo === 'ano_anterior') el('periodo-nome').textContent = 'Ano de ' + (new Date().getFullYear() - 1);
+
+            let q = db.from('transactions')
+                .select('id, tipo, valor, data, descricao, pessoa, forma_pagamento, categories(nome)')
+                .eq('excluido', false)
+                .gte('data', inicio)
+                .lte('data', fim)
+                .order('data', { ascending: false })
+                .order('created_at', { ascending: false })
+                .limit(LIMITE);
+
+            if (el('tipo').value) q = q.eq('tipo', el('tipo').value);
+            if (selCat.value) q = q.eq('category_id', selCat.value);
+
+            const nome = limparTexto(el('nome').value);
+            if (nome) q = q.ilike('pessoa', '%' + nome + '%');
+
+            const busca = limparTexto(el('busca').value);
+            if (busca) q = q.or('descricao.ilike.%' + busca + '%,pessoa.ilike.%' + busca + '%');
+
+            const { data, error } = await q;
+            if (meu !== pedido) return; // chegou uma busca mais nova
+
+            if (error) {
+                el('erro').textContent = 'Não foi possível buscar: ' + error.message;
+                return;
+            }
+
+            let entradas = 0, saidas = 0;
+            data.forEach((l) => {
+                if (l.tipo === 'entrada') entradas += Number(l.valor);
+                else saidas += Number(l.valor);
+            });
+            el('total-entradas').textContent = brl(entradas);
+            el('total-saidas').textContent = brl(saidas);
+            const res = entradas - saidas;
+            el('total-resultado').textContent = brl(res);
+            el('total-resultado').className = 'valor ' + (res >= 0 ? 'verde' : 'vermelho');
+
+            el('quantidade').textContent = 'Lançamentos (' + data.length + ')';
+            el('aviso').textContent = data.length >= LIMITE
+                ? 'Mostrando os ' + LIMITE + ' mais recentes. Refine os filtros para ver o restante.' : '';
+
+            const lista = el('lista');
+            lista.innerHTML = '';
+            if (data.length === 0) {
+                const vazio = document.createElement('div');
+                vazio.className = 'vazio';
+                vazio.textContent = 'Nenhum lançamento encontrado com esses filtros.';
+                lista.appendChild(vazio);
+                return;
+            }
+
+            data.forEach((l) => {
+                const item = document.createElement('div');
+                item.className = 'item';
+
+                const esq = document.createElement('div');
+                const d1 = document.createElement('div');
+                d1.className = 'data';
+                d1.textContent = dataCompleta(l.data) + (l.pessoa ? ' • ' + l.pessoa : '') +
+                    (l.forma_pagamento ? ' • ' + FORMAS[l.forma_pagamento] : '');
+                const d2 = document.createElement('div');
+                d2.className = 'desc';
+                d2.textContent = l.descricao || '(sem descrição)';
+                const d3 = document.createElement('div');
+                d3.className = 'cat';
+                d3.textContent = l.categories ? l.categories.nome : '';
+                esq.appendChild(d1);
+                esq.appendChild(d2);
+                esq.appendChild(d3);
+
+                const positivo = l.tipo === 'entrada';
+                const valor = document.createElement('div');
+                valor.className = 'quanto ' + (positivo ? 'verde' : 'vermelho');
+                valor.textContent = (positivo ? '+ ' : '- ') + brl(l.valor);
+
+                item.appendChild(esq);
+                item.appendChild(valor);
+                lista.appendChild(item);
+            });
+        }
+
+        function agendar() {
+            clearTimeout(temporizador);
+            temporizador = setTimeout(buscar, 400);
+        }
+
+        // ---------- Eventos ----------
+        el('periodo').addEventListener('change', buscar);
+        el('de').addEventListener('change', buscar);
+        el('ate').addEventListener('change', buscar);
+
+        el('tipo').addEventListener('change', () => {
+            const cat = categorias.find((c) => c.id === selCat.value);
+            if (cat && el('tipo').value && cat.tipo !== el('tipo').value) selCat.value = '';
+            buscar();
+        });
+
+        selCat.addEventListener('change', () => {
+            const cat = categorias.find((c) => c.id === selCat.value);
+            if (cat) el('tipo').value = cat.tipo;
+            buscar();
+        });
+
+        el('nome').addEventListener('input', agendar);
+        el('busca').addEventListener('input', agendar);
+
+        el('botao-limpar').addEventListener('click', () => {
+            el('periodo').value = 'mes';
+            el('tipo').value = '';
+            selCat.value = '';
+            el('nome').value = '';
+            el('busca').value = '';
+            el('de').value = '';
+            el('ate').value = '';
+            buscar();
+        });
+
+        buscar();
+    })();
+    </script>
+</body>
+</html>
