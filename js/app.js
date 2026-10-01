@@ -22,7 +22,7 @@ const PAGINAS = [
     { arquivo: 'historico.html',     nome: 'Histórico',     soAdmin: false, pronta: true },
     { arquivo: 'relatorios.html',    nome: 'Relatórios',    soAdmin: false, pronta: true },
     { arquivo: 'configuracoes.html', nome: 'Configurações', soAdmin: true,  pronta: true },
-    { arquivo: 'membros.html',       nome: 'Membros',       soAdmin: false, pronta: true  },
+    { arquivo: 'membros.html',       nome: 'Membros',       soAdmin: false, pronta: false  },
 ];
 
 // ---------- Funções de dinheiro e data ----------
