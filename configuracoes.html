@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações | M.A.K.E.L Tesouraria</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/icon-192.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta name="theme-color" content="#060200">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Tesouraria Kefas">
+</head>
+<body>
+    <main class="app">
+
+        <section class="logo"><h1>Tesouraria | M.A.K.E.L</h1></section>
+
+        <div class="topo">
+            <div>
+                <div id="ola" class="ola"></div>
+                <div id="selo" class="selo"></div>
+            </div>
+            <button id="botao-sair" class="botao-sair" type="button">SAIR</button>
+        </div>
+        <nav id="menu" class="menu"></nav>
+
+        <!-- ===== CATEGORIAS ===== -->
+        <div class="secao-titulo" style="margin-top:0">Nova categoria</div>
+        <form id="form-cat">
+            <label for="cat-tipo">Tipo</label>
+            <select id="cat-tipo">
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+            </select>
+            <label for="cat-nome">Nome da categoria</label>
+            <input type="text" id="cat-nome" placeholder="Ex.: Combustível">
+            <button type="submit">ADICIONAR</button>
+        </form>
+        <div id="msg-cat" class="mensagem"></div>
+
+        <div class="secao-titulo">Categorias de entrada</div>
+        <div id="lista-entrada" class="lista"></div>
+
+        <div class="secao-titulo">Categorias de saída</div>
+        <div id="lista-saida" class="lista"></div>
+        <div class="periodo-nome" style="margin-top:8px;text-align:left">
+            Categorias desativadas deixam de aparecer nos formulários, mas os lançamentos antigos continuam intactos.
+        </div>
+
+        <!-- ===== ACESSOS ===== -->
+        <div class="secao-titulo">Acessos ao sistema</div>
+        <div id="lista-acessos" class="lista"></div>
+        <div class="periodo-nome" style="margin-top:8px;text-align:left">
+            Para trocar a senha do login dos Pastores, use o painel do Supabase (Authentication → Users).
+        </div>
+
+        <!-- ===== SENHA ===== -->
+        <div class="secao-titulo">Alterar minha senha</div>
+        <form id="form-senha">
+            <label for="senha-nova">Nova senha (mínimo 8 caracteres)</label>
+            <input type="password" id="senha-nova" autocomplete="new-password">
+            <label for="senha-conf">Repita a nova senha</label>
+            <input type="password" id="senha-conf" autocomplete="new-password">
+            <button type="submit">ALTERAR SENHA</button>
+        </form>
+        <div id="msg-senha" class="mensagem"></div>
+
+        <div class="footer">
+            Aplicativo Oficial | Feito Por @davicanato1 <br>
+            Ministério Apostólico Kefas Lavradas ©<span id="ano-atual">2026</span> <br>
+            <center> CNPJ | 56.797.417/0001-81 </center>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+    <script>
+    (async () => {
+        const sessao = await iniciarPagina('configuracoes.html');
+        if (!sessao) return;
+
+        const el = (id) => document.getElementById(id);
+
+        function aviso(id, texto, ok) {
+            el(id).style.color = ok ? '#1e8449' : '#c0392b';
+            el(id).textContent = texto;
+        }
+
+        function botaoPequeno(texto, cor) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = texto;
+            b.style.cssText = 'width:auto;padding:6px 12px;font-size:12px;margin-left:6px;background:' + cor;
+            return b;
+        }
+
+        // ---------- Categorias ----------
+        function desenharLista(container, itens) {
+            container.innerHTML = '';
+            if (itens.length === 0) {
+                container.innerHTML = '<div class="vazio">Nenhuma categoria.</div>';
+                return;
+            }
+            itens.forEach((c) => {
+                const linha = document.createElement('div');
+                linha.className = 'item';
+
+                const nome = document.createElement('div');
+                nome.className = 'desc';
+                nome.textContent = c.nome + (c.ativa ? '' : ' (desativada)');
+                if (!c.ativa) nome.style.color = '#999';
+
+                const acoes = document.createElement('div');
+                acoes.style.whiteSpace = 'nowrap';
+
+                const bRenomear = botaoPequeno('Renomear', '#b08d3c');
+                bRenomear.addEventListener('click', async () => {
+                    const novo = prompt('Novo nome da categoria:', c.nome);
+                    if (novo === null) return;
+                    const limpo = novo.trim();
+                    if (!limpo || limpo === c.nome) return;
+                    const { error } = await db.from('categories').update({ nome: limpo }).eq('id', c.id);
+                    if (error) {
+                        aviso('msg-cat', error.code === '23505'
+                            ? 'Já existe uma categoria com esse nome.' : 'Erro: ' + error.message, false);
+                        return;
+                    }
+                    aviso('msg-cat', 'Categoria renomeada.', true);
+                    carregarCategorias();
+                });
+
+                const bAtivar = botaoPequeno(c.ativa ? 'Desativar' : 'Reativar', c.ativa ? '#c0392b' : '#27ae60');
+                bAtivar.addEventListener('click', async () => {
+                    const { error } = await db.from('categories').update({ ativa: !c.ativa }).eq('id', c.id);
+                    if (error) { aviso('msg-cat', 'Erro: ' + error.message, false); return; }
+                    aviso('msg-cat', c.ativa ? 'Categoria desativada.' : 'Categoria reativada.', true);
+                    carregarCategorias();
+                });
+
+                acoes.appendChild(bRenomear);
+                acoes.appendChild(bAtivar);
+                linha.appendChild(nome);
+                linha.appendChild(acoes);
+                container.appendChild(linha);
+            });
+        }
+
+        async function carregarCategorias() {
+            const { data, error } = await db
+                .from('categories').select('id, tipo, nome, ativa').order('nome');
+            if (error) { aviso('msg-cat', 'Erro ao carregar: ' + error.message, false); return; }
+            desenharLista(el('lista-entrada'), data.filter((c) => c.tipo === 'entrada'));
+            desenharLista(el('lista-saida'), data.filter((c) => c.tipo === 'saida'));
+        }
+
+        el('form-cat').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = el('cat-nome').value.trim();
+            if (!nome) { aviso('msg-cat', 'Digite o nome da categoria.', false); return; }
+            const { error } = await db.from('categories').insert({ tipo: el('cat-tipo').value, nome: nome });
+            if (error) {
+                aviso('msg-cat', error.code === '23505'
+                    ? 'Já existe uma categoria com esse nome.' : 'Erro: ' + error.message, false);
+                return;
+            }
+            el('cat-nome').value = '';
+            aviso('msg-cat', 'Categoria adicionada!', true);
+            carregarCategorias();
+        });
+
+        // ---------- Acessos (somente leitura) ----------
+        async function carregarAcessos() {
+            const { data, error } = await db.from('profiles').select('nome, email, role').order('role');
+            const lista = el('lista-acessos');
+            lista.innerHTML = '';
+            if (error) { lista.innerHTML = '<div class="vazio">Erro: ' + error.message + '</div>'; return; }
+            data.forEach((u) => {
+                const linha = document.createElement('div');
+                linha.className = 'item';
+                const esq = document.createElement('div');
+                const n = document.createElement('div');
+                n.className = 'desc';
+                n.textContent = u.nome;
+                const m = document.createElement('div');
+                m.className = 'cat';
+                m.textContent = u.email;
+                esq.appendChild(n);
+                esq.appendChild(m);
+                const papel = document.createElement('div');
+                papel.className = 'selo';
+                papel.textContent = u.role === 'admin' ? 'Administrador' : 'Visualização';
+                linha.appendChild(esq);
+                linha.appendChild(papel);
+                lista.appendChild(linha);
+            });
+        }
+
+        // ---------- Trocar a própria senha ----------
+        el('form-senha').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nova = el('senha-nova').value;
+            if (nova.length < 8) { aviso('msg-senha', 'A senha precisa ter pelo menos 8 caracteres.', false); return; }
+            if (nova !== el('senha-conf').value) { aviso('msg-senha', 'As senhas não são iguais.', false); return; }
+            const { error } = await db.auth.updateUser({ password: nova });
+            if (error) { aviso('msg-senha', 'Não foi possível alterar: ' + error.message, false); return; }
+            el('senha-nova').value = '';
+            el('senha-conf').value = '';
+            aviso('msg-senha', 'Senha alterada com sucesso!', true);
+        });
+
+        carregarCategorias();
+        carregarAcessos();
+    })();
+    </script>
+</body>
+</html>
