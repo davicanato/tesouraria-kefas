@@ -16,14 +16,29 @@ const PAGINA_INICIAL = 'dashboard.html';
 // pronta: true  -> aparece no menu
 // soAdmin: true -> só o Administrador vê e acessa
 const PAGINAS = [
-    { arquivo: 'dashboard.html',     nome: 'Dashboard',     soAdmin: false, pronta: true  },
+    { arquivo: 'dashboard.html',     nome: 'Dashboard',     soAdmin: false, pronta: true },
     { arquivo: 'entradas.html',      nome: 'Entradas',      soAdmin: true,  pronta: true },
     { arquivo: 'saidas.html',        nome: 'Saídas',        soAdmin: true,  pronta: true },
     { arquivo: 'historico.html',     nome: 'Histórico',     soAdmin: false, pronta: true },
+    { arquivo: 'membros.html',       nome: 'Membros',       soAdmin: false, pronta: true },
     { arquivo: 'relatorios.html',    nome: 'Relatórios',    soAdmin: false, pronta: true },
-    { arquivo: 'configuracoes.html', nome: 'Configurações', soAdmin: true,  pronta: true },
-    { arquivo: 'membros.html',       nome: 'Membros',       soAdmin: false, pronta: false  },
+    { arquivo: 'configuracoes.html', nome: 'Configurações', soAdmin: true,  pronta: true }
 ];
+
+// ---------- Esconder valores (botão de olho) ----------
+// A escolha fica guardada neste aparelho.
+function lerValoresOcultos() {
+    try { return localStorage.getItem('valoresOcultos') === '1'; } catch (e) { return false; }
+}
+const VALORES_OCULTOS = lerValoresOcultos();
+
+function alternarValores() {
+    try { localStorage.setItem('valoresOcultos', VALORES_OCULTOS ? '0' : '1'); } catch (e) {}
+    window.location.reload();
+}
+
+const ICONE_OLHO = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const ICONE_OLHO_RISCADO = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 
 // ---------- Funções de dinheiro e data ----------
 function pad(n) {
@@ -35,6 +50,7 @@ function iso(d) {
 }
 
 function brl(valor) {
+    if (VALORES_OCULTOS) return 'R$ ****';
     return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
@@ -109,7 +125,7 @@ async function iniciarPagina(arquivoAtual) {
     return { usuario: data.session.user, perfil: perfil };
 }
 
-// Preenche nome, selo, menu e botão SAIR
+// Preenche nome, selo, menu, botão do olho e botão SAIR
 function preencherTopo(perfil, arquivoAtual) {
     const ola = document.getElementById('ola');
     if (ola) ola.textContent = 'Olá, ' + perfil.nome;
@@ -139,46 +155,77 @@ function preencherTopo(perfil, arquivoAtual) {
     }
 
     const botaoSair = document.getElementById('botao-sair');
-    if (botaoSair) botaoSair.addEventListener('click', sairDoSistema);
+    if (botaoSair) {
+        botaoSair.addEventListener('click', sairDoSistema);
+
+        // Botão de olho, ao lado do SAIR
+        const grupo = document.createElement('div');
+        grupo.style.cssText = 'display:flex;gap:8px;align-items:center;flex:0 0 auto';
+        botaoSair.parentNode.insertBefore(grupo, botaoSair);
+
+        const olho = document.createElement('button');
+        olho.type = 'button';
+        olho.className = 'botao-sair';
+        olho.style.cssText = 'display:flex;align-items:center;justify-content:center;padding:8px 12px';
+        olho.innerHTML = VALORES_OCULTOS ? ICONE_OLHO_RISCADO : ICONE_OLHO;
+        olho.setAttribute('aria-label', VALORES_OCULTOS ? 'Mostrar valores' : 'Esconder valores');
+        olho.title = VALORES_OCULTOS ? 'Mostrar valores' : 'Esconder valores';
+        if (VALORES_OCULTOS) olho.style.color = '#c59b27';
+        olho.addEventListener('click', alternarValores);
+
+        grupo.appendChild(olho);
+        grupo.appendChild(botaoSair);
+    }
 
     const ano = document.getElementById('ano-atual');
     if (ano) ano.textContent = new Date().getFullYear();
 }
 
+// ---------- App instalável (PWA) ----------
+(function configurarApp() {
+    const adicionar = (tag, atributos) => {
+        const e = document.createElement(tag);
+        Object.keys(atributos).forEach((k) => e.setAttribute(k, atributos[k]));
+        document.head.appendChild(e);
+    };
+    adicionar('link', { rel: 'manifest', href: '/manifest.json' });
+    adicionar('link', { rel: 'icon', type: 'image/png', href: '/icon-192.png' });
+    adicionar('link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' });
+    adicionar('meta', { name: 'theme-color', content: '#060200' });
+    adicionar('meta', { name: 'mobile-web-app-capable', content: 'yes' });
+    adicionar('meta', { name: 'apple-mobile-web-app-capable', content: 'yes' });
+    adicionar('meta', { name: 'apple-mobile-web-app-title', content: 'Tesouraria Kefas' });
+    adicionar('meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' });
 
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+    }
+})();
+
+// ---------- Botão "Instalar aplicação" (só aparece se existir um elemento com id btnInstalar) ----------
 let instaladorPWA;
 const btnInstalar = document.getElementById('btnInstalar');
 
-// O navegador deteta que o site pode ser instalado e ativa o botão
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     instaladorPWA = e;
-    
-    // Revela o botão no próprio site para o utilizador clicar
     if (btnInstalar) {
         btnInstalar.classList.remove('oculto');
     }
 });
 
-// Quando o utilizador clica no botão "Instalar Aplicação" no teu site
 if (btnInstalar) {
     btnInstalar.addEventListener('click', async () => {
         if (!instaladorPWA) return;
-        
-        // Abre a janela oficial de instalação do telemóvel
         instaladorPWA.prompt();
-        
-        const { outcome } = await instaladorPWA.userChoice;
-        if (outcome === 'accepted') {
-            console.log('Aplicação instalada com sucesso!');
-        }
-        
+        await instaladorPWA.userChoice;
         instaladorPWA = null;
         btnInstalar.classList.add('oculto');
     });
 }
 
-// Oculta o botão se a aplicação já estiver instalada/aberta
 window.addEventListener('appinstalled', () => {
     if (btnInstalar) btnInstalar.classList.add('oculto');
 });
