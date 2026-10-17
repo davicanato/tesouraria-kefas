@@ -1,3 +1,11 @@
+
+/* ---------- Ajuste: nomes longos não empurram os botões para fora ---------- */
+.item { flex-wrap: wrap; }
+.item > div:first-child { flex: 1 1 150px; min-width: 0; }
+.item > div:last-child:not(:first-child) { margin-left: auto; }
+.item .desc, .item .cat, .item .data { overflow-wrap: anywhere; }
+
+
 /* =====================================================
    TESOURARIA KEFAS - ESTILO PREMIUM DEFINITIVO
    - Menu em grade de 3 colunas (3 em cima, 3 embaixo)
