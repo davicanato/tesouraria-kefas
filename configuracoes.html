@@ -50,6 +50,31 @@
             Categorias desativadas deixam de aparecer nos formulários, mas os lançamentos antigos continuam intactos.
         </div>
 
+        <!-- ===== CORRIGIR NOMES ===== -->
+        <div class="secao-titulo">Corrigir nomes nos lançamentos</div>
+        <div class="periodo-nome" style="text-align:left;margin-bottom:12px">
+            Use para acrescentar o sobrenome ou separar duas pessoas com o mesmo nome (ex.: duas "Tania").
+            Escolha o nome, marque os lançamentos de uma das pessoas e digite o nome completo.
+        </div>
+
+        <label for="nome-busca">Nome a corrigir</label>
+        <select id="nome-busca"></select>
+
+        <div id="nome-lista" class="lista oculto"></div>
+
+        <div id="nome-acao" class="oculto" style="margin-top:14px">
+            <div>
+                <button id="nome-todos" type="button"
+                        style="width:auto;padding:6px 12px;font-size:12px;margin:0 6px 12px 0;box-shadow:none;background:#f1f5f9;color:#475569">Marcar todos</button>
+                <button id="nome-nenhum" type="button"
+                        style="width:auto;padding:6px 12px;font-size:12px;margin:0 6px 12px 0;box-shadow:none;background:#f1f5f9;color:#475569">Desmarcar todos</button>
+            </div>
+            <label for="nome-novo">Novo nome (completo)</label>
+            <input type="text" id="nome-novo" placeholder="Ex.: Tania Silva">
+            <button id="nome-salvar" type="button">RENOMEAR MARCADOS</button>
+        </div>
+        <div id="msg-nome" class="mensagem"></div>
+
         <!-- ===== ACESSOS ===== -->
         <div class="secao-titulo">Acessos ao sistema</div>
         <div id="lista-acessos" class="lista"></div>
@@ -171,6 +196,148 @@
             carregarCategorias();
         });
 
+        // ---------- Corrigir nomes nos lançamentos ----------
+        let caixasNome = [];
+
+        async function carregarNomesParaCorrigir() {
+            const selecionado = el('nome-busca').value;
+            let todos = [];
+            let de = 0;
+            while (true) {
+                const { data, error } = await db
+                    .from('transactions')
+                    .select('pessoa')
+                    .eq('excluido', false)
+                    .not('pessoa', 'is', null)
+                    .order('id')
+                    .range(de, de + 999);
+                if (error) { aviso('msg-nome', 'Erro ao carregar os nomes: ' + error.message, false); return; }
+                todos = todos.concat(data);
+                if (data.length < 1000) break;
+                de += 1000;
+            }
+
+            const contagem = {};
+            todos.forEach((l) => { contagem[l.pessoa] = (contagem[l.pessoa] || 0) + 1; });
+            const nomes = Object.keys(contagem).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+            const sel = el('nome-busca');
+            sel.innerHTML = '<option value="">Escolha um nome...</option>';
+            nomes.forEach((n) => {
+                const o = document.createElement('option');
+                o.value = n;
+                o.textContent = n + ' (' + contagem[n] + ')';
+                sel.appendChild(o);
+            });
+            sel.value = contagem[selecionado] ? selecionado : '';
+            mostrarLancamentosDoNome();
+        }
+
+        async function mostrarLancamentosDoNome() {
+            const nome = el('nome-busca').value;
+            const lista = el('nome-lista');
+            caixasNome = [];
+            lista.innerHTML = '';
+
+            if (!nome) {
+                lista.classList.add('oculto');
+                el('nome-acao').classList.add('oculto');
+                return;
+            }
+
+            const { data, error } = await db
+                .from('transactions')
+                .select('id, tipo, valor, data, descricao, categories(nome)')
+                .eq('pessoa', nome)
+                .eq('excluido', false)
+                .order('data', { ascending: false });
+            if (error) { aviso('msg-nome', 'Erro ao carregar: ' + error.message, false); return; }
+
+            lista.classList.remove('oculto');
+            el('nome-acao').classList.remove('oculto');
+
+            data.forEach((l) => {
+                const item = document.createElement('div');
+                item.className = 'item';
+                item.style.cursor = 'pointer';
+
+                const esq = document.createElement('div');
+                esq.style.cssText = 'display:flex;align-items:center;gap:12px';
+
+                const caixa = document.createElement('input');
+                caixa.type = 'checkbox';
+                caixa.value = l.id;
+                caixa.style.cssText = 'width:auto;margin:0;padding:0;box-shadow:none;flex:0 0 auto';
+                caixasNome.push(caixa);
+
+                const texto = document.createElement('div');
+                const d1 = document.createElement('div');
+                d1.className = 'data';
+                d1.textContent = l.data.slice(8, 10) + '/' + l.data.slice(5, 7) + '/' + l.data.slice(0, 4);
+                const d2 = document.createElement('div');
+                d2.className = 'desc';
+                d2.textContent = l.descricao || '(sem descrição)';
+                const d3 = document.createElement('div');
+                d3.className = 'cat';
+                d3.textContent = l.categories ? l.categories.nome : '';
+                texto.appendChild(d1);
+                texto.appendChild(d2);
+                texto.appendChild(d3);
+
+                esq.appendChild(caixa);
+                esq.appendChild(texto);
+
+                const positivo = l.tipo === 'entrada';
+                const valor = document.createElement('div');
+                valor.className = 'quanto ' + (positivo ? 'verde' : 'vermelho');
+                valor.textContent = (positivo ? '+ ' : '- ') + brl(l.valor);
+
+                item.addEventListener('click', (ev) => {
+                    if (ev.target !== caixa) caixa.checked = !caixa.checked;
+                });
+
+                item.appendChild(esq);
+                item.appendChild(valor);
+                lista.appendChild(item);
+            });
+        }
+
+        el('nome-busca').addEventListener('change', () => {
+            el('msg-nome').textContent = '';
+            el('nome-novo').value = '';
+            mostrarLancamentosDoNome();
+        });
+        el('nome-todos').addEventListener('click', () => caixasNome.forEach((c) => { c.checked = true; }));
+        el('nome-nenhum').addEventListener('click', () => caixasNome.forEach((c) => { c.checked = false; }));
+
+        el('nome-salvar').addEventListener('click', async () => {
+            const antigo = el('nome-busca').value;
+            const novo = el('nome-novo').value.trim();
+            const ids = caixasNome.filter((c) => c.checked).map((c) => c.value);
+
+            if (!antigo) { aviso('msg-nome', 'Escolha o nome a corrigir.', false); return; }
+            if (ids.length === 0) { aviso('msg-nome', 'Marque pelo menos um lançamento.', false); return; }
+            if (!novo) { aviso('msg-nome', 'Digite o novo nome.', false); return; }
+            if (novo === antigo) { aviso('msg-nome', 'O novo nome é igual ao atual.', false); return; }
+
+            if (!confirm('Trocar o nome de ' + ids.length + ' lançamento(s) de "' + antigo + '" para "' + novo + '"?')) return;
+
+            el('nome-salvar').disabled = true;
+            let erro = null;
+            for (let i = 0; i < ids.length && !erro; i += 100) {
+                const parte = ids.slice(i, i + 100);
+                const r = await db.from('transactions').update({ pessoa: novo }).in('id', parte);
+                erro = r.error;
+            }
+            el('nome-salvar').disabled = false;
+
+            if (erro) { aviso('msg-nome', 'Não foi possível renomear: ' + erro.message, false); return; }
+
+            el('nome-novo').value = '';
+            aviso('msg-nome', ids.length + ' lançamento(s) atualizado(s) para "' + novo + '".', true);
+            carregarNomesParaCorrigir();
+        });
+
         // ---------- Acessos (somente leitura) ----------
         async function carregarAcessos() {
             const { data, error } = await db.from('profiles').select('nome, email, role').order('role');
@@ -212,6 +379,7 @@
         });
 
         carregarCategorias();
+        carregarNomesParaCorrigir();
         carregarAcessos();
     })();
     </script>
