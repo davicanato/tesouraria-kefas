@@ -1,3 +1,26 @@
+
+// ---------- Sem zoom de pinça (celular) ----------
+(function semZoom() {
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+    }
+
+    const estilo = document.createElement('style');
+    estilo.textContent =
+        'html, body { touch-action: pan-x pan-y; }' +
+        'input, select, textarea { font-size: 16px; }';
+    document.head.appendChild(estilo);
+
+    // iPhone: bloqueia o gesto de pinça
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach((nome) => {
+        document.addEventListener(nome, (e) => e.preventDefault());
+    });
+})();
+
+
+
+
 // =====================================================
 // TESOURARIA KEFAS - CÓDIGO COMPARTILHADO
 // Usado por todas as páginas. Mexa aqui só quando a
