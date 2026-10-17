@@ -131,8 +131,8 @@
             if (p === 'mes_anterior') return [iso(new Date(y, m - 1, 1)), iso(new Date(y, m, 0))];
             if (p === 'ano') return [y + '-01-01', y + '-12-31'];
             if (p === 'ano_anterior') return [(y - 1) + '-01-01', (y - 1) + '-12-31'];
-            if (p === 'personalizado') return [el('de').value || '0000-01-01', el('ate').value || '9999-12-31'];
-            return ['0000-01-01', '9999-12-31'];
+            if (p === 'personalizado') return [el('de').value || '2000-01-01', el('ate').value || '2150-12-31'];
+            return ['2000-01-01', '2150-12-31'];
         }
 
         function limparTexto(t) {
