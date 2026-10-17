@@ -72,6 +72,50 @@ async function iniciarLancamento(tipo, arquivo) {
     });
     el('descricao').addEventListener('input', () => { descAuto = false; });
 
+    // ---------- Sugestão de nomes (completa enquanto você digita) ----------
+    const listaNomes = document.createElement('datalist');
+    listaNomes.id = 'sugestoes-nomes';
+    document.body.appendChild(listaNomes);
+    el('pessoa').setAttribute('list', 'sugestoes-nomes');
+    el('pessoa').setAttribute('autocomplete', 'off');
+
+    async function carregarNomes() {
+        const vistos = new Map();
+        const guardar = (nome) => {
+            const limpo = (nome || '').trim();
+            if (!limpo) return;
+            const chave = limpo.toLowerCase();
+            if (!vistos.has(chave)) vistos.set(chave, limpo);
+        };
+
+        // Nos lançamentos de entrada, os membros vêm primeiro (grafia oficial)
+        if (ehEntrada) {
+            const { data: membros } = await db.from('members').select('nome').eq('ativo', true);
+            (membros || []).forEach((m) => guardar(m.nome));
+        }
+
+        // Nomes já usados antes neste tipo de lançamento
+        const { data: antigos } = await db
+            .from('transactions')
+            .select('pessoa')
+            .eq('tipo', tipo)
+            .eq('excluido', false)
+            .not('pessoa', 'is', null)
+            .order('created_at', { ascending: false })
+            .limit(1000);
+        (antigos || []).forEach((l) => guardar(l.pessoa));
+
+        listaNomes.innerHTML = '';
+        Array.from(vistos.values())
+            .sort((a, b) => a.localeCompare(b, 'pt-BR'))
+            .forEach((nome) => {
+                const o = document.createElement('option');
+                o.value = nome;
+                listaNomes.appendChild(o);
+            });
+    }
+    carregarNomes();
+
     // ---------- Formulário ----------
     function limpar() {
         el('form-lanc').reset();
@@ -123,6 +167,7 @@ async function iniciarLancamento(tipo, arquivo) {
         limpar();
         msg.style.color = '#1e8449';
         msg.textContent = 'Lançamento salvo!';
+        carregarNomes();
         carregarLista();
     });
 
@@ -212,6 +257,7 @@ async function iniciarLancamento(tipo, arquivo) {
                     return;
                 }
                 if (idEditando === l.id) limpar();
+                carregarNomes();
                 carregarLista();
             });
 
